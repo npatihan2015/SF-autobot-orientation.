@@ -199,7 +199,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--dark);user-sel
   </div>
 </div>
 
-<!-- DEPENDENCIES: Includes GLTFLoader for custom 3D model support -->
+<!-- DEPENDENCIES -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/EffectComposer.js"></script>
@@ -214,22 +214,6 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--dark);user-sel
    CUSTOM GLB/GLTF LOADER ENABLED FOR OPTIMUS PRIME
 ====================================================================== */
 const USE_CUSTOM_GLTF = true;
-
-// ตั้งค่าพื้นฐานสำหรับใช้งานบน GitHub (ดึงไฟล์จาก Folder เดียวกัน)
-let CUSTOM_GLTF_URL = "./scene.gltf"; 
-const manager = new THREE.LoadingManager();
-
-// เช็คว่ากำลังรันอยู่ในระบบ Preview ของ AI หรือไม่ 
-// (ถ้าใช่ ให้ดึงไฟล์ชั่วคราวที่อัปโหลดไว้ เพื่อให้พรีวิวทำงานได้)
-if (window.location.protocol === 'blob:') {
-    CUSTOM_GLTF_URL = "uploaded:optimus_prime_rotf_dotm_animation.zip/scene.gltf";
-    manager.setURLModifier((url) => {
-        if (url.includes('scene.bin')) return "uploaded:optimus_prime_rotf_dotm_animation.zip/scene.bin";
-        if (url.includes('RB_Optimus_MATINST_baseColor.jpeg')) return "uploaded:optimus_prime_rotf_dotm_animation.zip/textures/RB_Optimus_MATINST_baseColor.jpeg";
-        if (url.includes('RB_OptimusHead_MATINST_baseColor.jpeg')) return "uploaded:optimus_prime_rotf_dotm_animation.zip/textures/RB_OptimusHead_MATINST_baseColor.jpeg";
-        return url;
-    });
-}
 
 /* ── AUDIO ENGINE ── */
 const Snd = {
@@ -351,7 +335,7 @@ scene.add(sun);
 const cR = new THREE.PointLight(0x00ffff, 0, 25); cR.position.set(-7,5,-2); scene.add(cR);
 const rR = new THREE.PointLight(0xff0033, 0, 20); rR.position.set(6,4,-4); scene.add(rR);
 
-/* ── AUTO-ASSEMBLY GLTF LOADER ── */
+/* ── AUTO-ASSEMBLY GLTF LOADER WITH FALLBACK ── */
 const robot = new THREE.Group(); scene.add(robot);
 
 let mixer;
@@ -360,82 +344,144 @@ let customModelChunks = [];
 let customModelRoot;
 
 if(USE_CUSTOM_GLTF) {
+  const manager = new THREE.LoadingManager();
   const customLoader = new THREE.GLTFLoader(manager);
 
-  customLoader.load(CUSTOM_GLTF_URL, function(gltf) {
-    customModelRoot = gltf.scene;
-    
-    // Auto-Scale Optimus to fit the hangar perfectly
-    const box = new THREE.Box3().setFromObject(customModelRoot);
-    const size = box.getSize(new THREE.Vector3()).length();
-    const scaleFactor = 10 / size; // Scale to ~10 units
-    customModelRoot.scale.setScalar(scaleFactor);
-    
-    // Adjust Y position so feet touch the floor
-    box.setFromObject(customModelRoot);
-    customModelRoot.position.y += (-box.min.y - 1.4); 
+  async function loadOptimusModel() {
+    try {
+      // ตั้งค่า URL เริ่มต้นสำหรับการโฮสต์บนเครื่องหรือ GitHub
+      let gltfUrl = "./scene.gltf";
+      
+      // ตรวจสอบว่ากำลังรันในหน้า Preview ของ AI Chat
+      const isPreview = window.location.protocol === 'blob:' || window.location.hostname.includes('usercontent');
+      
+      if (isPreview) {
+          const lmEl = document.getElementById('lm');
+          if(lmEl) lmEl.textContent = "FETCHING PREVIEW ASSETS...";
+          
+          try {
+              // พยายามดึงไฟล์ที่จำลองอยู่ในหน้าต่างแชท (Uploaded files)
+              const [gltfRes, binRes, tex1Res, tex2Res] = await Promise.all([
+                  fetch("uploaded:optimus_prime_rotf_dotm_animation.zip/scene.gltf"),
+                  fetch("uploaded:optimus_prime_rotf_dotm_animation.zip/scene.bin"),
+                  fetch("uploaded:optimus_prime_rotf_dotm_animation.zip/textures/RB_Optimus_MATINST_baseColor.jpeg"),
+                  fetch("uploaded:optimus_prime_rotf_dotm_animation.zip/textures/RB_OptimusHead_MATINST_baseColor.jpeg")
+              ]);
 
-    // Enable Animations if any exist
-    if(gltf.animations && gltf.animations.length > 0) {
-      mixer = new THREE.AnimationMixer(customModelRoot);
-      gltfAnimations = gltf.animations;
-    }
+              if (!gltfRes.ok || !binRes.ok) throw new Error("Fetch Uploaded Failed");
 
-    let meshes = [];
-    customModelRoot.traverse((node) => {
-      if (node.isMesh) {
-        node.castShadow = true;
-        node.receiveShadow = true;
-        // Boost material realism
-        if(node.material) {
-           node.material.metalness = 0.8;
-           node.material.roughness = 0.3;
+              const gltfBlobUrl = URL.createObjectURL(await gltfRes.blob());
+              const binBlobUrl = URL.createObjectURL(await binRes.blob());
+              const tex1BlobUrl = URL.createObjectURL(await tex1Res.blob());
+              const tex2BlobUrl = URL.createObjectURL(await tex2Res.blob());
+
+              gltfUrl = gltfBlobUrl;
+              
+              manager.setURLModifier((url) => {
+                  if (url.includes('scene.bin')) return binBlobUrl;
+                  if (url.includes('RB_Optimus_MATINST_baseColor.jpeg')) return tex1BlobUrl;
+                  if (url.includes('RB_OptimusHead_MATINST_baseColor.jpeg')) return tex2BlobUrl;
+                  return url;
+              });
+          } catch (fetchError) {
+              console.warn("ระบบดึงไฟล์จำลองล้มเหลว กำลังสลับไปดึงจาก GitHub...", fetchError);
+              // Fallback: ถ้าระบบจำลองบล็อก ให้ไปดึงจาก GitHub ของคุณโดยตรง
+              const baseUrl = "https://raw.githubusercontent.com/npatihan2015/SF-autobot-orientation/main/";
+              gltfUrl = baseUrl + "scene.gltf";
+              
+              manager.setURLModifier((url) => {
+                  if (url.includes('scene.bin')) return baseUrl + "scene.bin";
+                  if (url.includes('RB_Optimus_MATINST_baseColor.jpeg')) return baseUrl + "textures/RB_Optimus_MATINST_baseColor.jpeg";
+                  if (url.includes('RB_OptimusHead_MATINST_baseColor.jpeg')) return baseUrl + "textures/RB_OptimusHead_MATINST_baseColor.jpeg";
+                  return url;
+              });
+          }
+      }
+
+      const lmEl = document.getElementById('lm');
+      if(lmEl) lmEl.textContent = "BUILDING MESHES...";
+
+      customLoader.load(gltfUrl, function(gltf) {
+        customModelRoot = gltf.scene;
+        
+        // Auto-Scale Optimus to fit the hangar perfectly
+        const box = new THREE.Box3().setFromObject(customModelRoot);
+        const size = box.getSize(new THREE.Vector3()).length();
+        const scaleFactor = 10 / size; // Scale to ~10 units
+        customModelRoot.scale.setScalar(scaleFactor);
+        
+        // Adjust Y position so feet touch the floor
+        box.setFromObject(customModelRoot);
+        customModelRoot.position.y += (-box.min.y - 1.4); 
+
+        // Enable Animations if any exist
+        if(gltf.animations && gltf.animations.length > 0) {
+          mixer = new THREE.AnimationMixer(customModelRoot);
+          gltfAnimations = gltf.animations;
+        }
+
+        let meshes = [];
+        customModelRoot.traverse((node) => {
+          if (node.isMesh) {
+            node.castShadow = true;
+            node.receiveShadow = true;
+            // Boost material realism
+            if(node.material) {
+               node.material.metalness = 0.8;
+               node.material.roughness = 0.3;
+            }
+            
+            // Calculate the height (Y) of each mesh to sort them bottom-to-top
+            node.geometry.computeBoundingBox();
+            let center = new THREE.Vector3();
+            node.geometry.boundingBox.getCenter(center);
+            node.localToWorld(center);
+            meshes.push({mesh: node, y: center.y});
+            node.visible = false; // Hide all meshes initially for assembly
+          }
+        });
+
+        // Sort meshes by Height (Y axis) ascending
+        meshes.sort((a,b) => a.y - b.y);
+
+        // Group sorted meshes into 7 exact stages automatically!
+        const numStages = 7;
+        const chunkSize = Math.ceil(meshes.length / numStages);
+        for(let i=0; i<numStages; i++) {
+          customModelChunks.push(meshes.slice(i*chunkSize, (i+1)*chunkSize).map(m => m.mesh));
+        }
+
+        // Reveal already completed stages instantly (loaded from local storage)
+        for(let i=1; i<currentStage; i++) {
+           if(customModelChunks[i-1]) {
+             customModelChunks[i-1].forEach(m => m.visible = true);
+           }
+        }
+
+        robot.add(customModelRoot);
+        
+        // เมื่อโหลดเสร็จแล้ว ให้ซ่อน Loading screen
+        const ldr = document.getElementById('loader');
+        if (ldr) {
+            ldr.style.opacity = 0;
+            setTimeout(() => ldr.style.display = 'none', 800);
         }
         
-        // Calculate the height (Y) of each mesh to sort them bottom-to-top
-        node.geometry.computeBoundingBox();
-        let center = new THREE.Vector3();
-        node.geometry.boundingBox.getCenter(center);
-        node.localToWorld(center);
-        meshes.push({mesh: node, y: center.y});
-        node.visible = false; // Hide all meshes initially for assembly
-      }
-    });
-
-    // Sort meshes by Height (Y axis) ascending
-    meshes.sort((a,b) => a.y - b.y);
-
-    // Group sorted meshes into 7 exact stages automatically!
-    const numStages = 7;
-    const chunkSize = Math.ceil(meshes.length / numStages);
-    for(let i=0; i<numStages; i++) {
-      customModelChunks.push(meshes.slice(i*chunkSize, (i+1)*chunkSize).map(m => m.mesh));
+      }, undefined, function (error) {
+        console.error("GLTF Load Error:", error);
+        const errEl = document.getElementById('lm');
+        if (errEl) {
+            errEl.innerHTML = "ไม่สามารถเชื่อมต่อโมเดลได้<br/>ลองรันบน GitHub โดยตรงครับ";
+            errEl.style.color = "red";
+        }
+      });
+      
+    } catch (e) {
+      console.error("Critical Load Error", e);
     }
-
-    // Reveal already completed stages instantly (loaded from local storage)
-    for(let i=1; i<currentStage; i++) {
-       if(customModelChunks[i-1]) {
-         customModelChunks[i-1].forEach(m => m.visible = true);
-       }
-    }
-
-    robot.add(customModelRoot);
-    
-    // เมื่อโหลดเสร็จแล้ว ให้ซ่อน Loading screen
-    const ldr = document.getElementById('loader');
-    if (ldr) {
-        ldr.style.opacity = 0;
-        setTimeout(() => ldr.style.display = 'none', 800);
-    }
-    
-  }, undefined, function (error) {
-    console.error("GLTF Load Error:", error);
-    const lmEl = document.getElementById('lm');
-    if (lmEl) {
-        lmEl.textContent = "ERROR LOADING GLTF ASSETS.";
-        lmEl.style.color = "red";
-    }
-  });
+  }
+  
+  loadOptimusModel();
 }
 
 /* ── IMMERSIVE HANGAR BAY ── */
@@ -478,7 +524,7 @@ const frameMat = new THREE.MeshStandardMaterial({color:0x222222, metalness:0.7, 
   cw.position.set(0, y, -5.5); scene.add(cw);
 });
 
-// Overhead Volumetric Spotlight - ลดความเข้มของไฟลงเพื่อให้โมเดลสว่างพอดี
+// Overhead Volumetric Spotlight
 const spotG = new THREE.ConeGeometry(3, 16, 32, 1, true);
 const spotM = new THREE.MeshBasicMaterial({color:0xffffff, transparent:true, opacity:0.02, blending:THREE.AdditiveBlending, side:THREE.DoubleSide, depthWrite:false});
 const spotlight = new THREE.Mesh(spotG, spotM);
@@ -546,7 +592,6 @@ const sparks = new THREE.Points(ptG, ptM); scene.add(sparks);
 let sLife = 0;
 function fireSparksGLTF(meshes) {
   if(!meshes || meshes.length === 0) return;
-  // Calculate average center of the chunk for the explosion origin
   let center = new THREE.Vector3();
   let count = 0;
   meshes.forEach(m => {
@@ -596,8 +641,6 @@ window.setAnim = (n) => {
   
   if (USE_CUSTOM_GLTF && mixer && gltfAnimations.length > 0) {
       mixer.stopAllAction();
-      // Attempt to find animation matching button string, otherwise default to first.
-      // Often sketchfab models only have 1 long animation (Take 001). 
       let clip = gltfAnimations.find(a => a.name.toLowerCase().includes(n)) || gltfAnimations[0];
       if(clip) mixer.clipAction(clip).play();
   }
@@ -608,7 +651,6 @@ renderUI();
 let loadPct=0; const lbw=document.getElementById('lb'), lm=document.getElementById('lm');
 const lInt=setInterval(()=>{
   loadPct+=Math.random()*15; if(loadPct>100)loadPct=100; lbw.style.width=loadPct+'%';
-  // เอาเงื่อนไขที่ซ่อน Loader ออก ปล่อยให้ GLTFLoader จัดการซ่อนเองเมื่อโหลดเสร็จ
 }, 80);
 
 const clk = new THREE.Clock();
