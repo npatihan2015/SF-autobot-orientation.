@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>SanFun Group — Autobot Assembly</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&family=Exo+2:wght@300;400;600&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--red:#e63946;--cyan:#00f5ff;--amber:#ffb703;--green:#39ff14;--dark:#030810;--panel:rgba(4,12,26,0.93);--border:rgba(0,245,255,0.13);--text:#7dc8e0;--bright:#dff6ff}
+html,body{width:100%;height:100%;overflow:hidden;background:var(--dark);user-select:none}
+body{font-family:'Exo 2',sans-serif;color:var(--text)}
+#c{position:fixed;inset:0;width:100%;height:100%;display:block;cursor:grab}
+#c:active{cursor:grabbing}
+.scanlines{position:fixed;inset:0;pointer-events:none;z-index:5;background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,0,0,0.05) 3px,rgba(0,0,0,0.05) 4px)}
+.vignette{position:fixed;inset:0;pointer-events:none;z-index:4;background:radial-gradient(ellipse at center,transparent 45%,rgba(0,0,0,0.75) 100%)}
+
+/* HUD TOP */
+.hud-top{position:fixed;top:0;left:0;right:0;z-index:20;display:flex;align-items:center;justify-content:space-between;padding:12px 22px;background:linear-gradient(180deg,rgba(3,8,16,.98) 0%,transparent 100%);border-bottom:1px solid var(--border)}
+.logo-block{display:flex;align-items:center;gap:12px}
+.logo-icon{width:36px;height:36px;border:1px solid var(--cyan);display:flex;align-items:center;justify-content:center;box-shadow:0 0 12px rgba(0,245,255,.3)}
+.logo-icon svg{width:20px;height:20px}
+.t1{font-family:'Orbitron',monospace;font-size:13px;font-weight:900;color:var(--bright);letter-spacing:4px}
+.t2{font-family:'Share Tech Mono',monospace;font-size:8px;color:var(--cyan);letter-spacing:3px;opacity:.7}
+.hud-center{font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--cyan);letter-spacing:3px;opacity:.6}
+.status-pill{display:flex;align-items:center;gap:5px;font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:2px;padding:4px 9px;border:1px solid var(--border);transition:all .3s}
+.dot{width:5px;height:5px;border-radius:50%;animation:blink 1.4s step-end infinite}
+.dot.g{background:var(--green);box-shadow:0 0 5px var(--green)}.dot.a{background:var(--amber);box-shadow:0 0 5px var(--amber)}.dot.r{background:var(--red);box-shadow:0 0 5px var(--red)}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+
+/* PANELS */
+.panel-l{position:fixed;left:18px;top:72px;bottom:58px;width:280px;z-index:20;display:flex;flex-direction:column;gap:10px;overflow-y:auto;scrollbar-width:none}
+.panel-l::-webkit-scrollbar{display:none}
+.panel-r{position:fixed;right:18px;top:72px;width:232px;z-index:20;display:flex;flex-direction:column;gap:10px;transition:opacity 0.6s, transform 0.6s;opacity:0.1;pointer-events:none;transform:translateX(20px)}
+.panel-r.unlocked{opacity:1;pointer-events:auto;transform:translateX(0)}
+.card{background:var(--panel);border:1px solid var(--border);padding:15px;position:relative;backdrop-filter:blur(14px)}
+.card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--cyan),transparent);opacity:.45}
+.ct{font-family:'Orbitron',monospace;font-size:9px;color:var(--cyan);letter-spacing:3px;margin-bottom:12px;display:flex;align-items:center;gap:7px}
+.ct::after{content:'';flex:1;height:1px;background:var(--border)}
+
+/* STAGE ITEMS */
+#stages-container{display:flex;flex-direction:column;gap:6px;}
+.si{display:flex;flex-direction:column;padding:8px 10px;border:1px solid transparent;transition:all .3s;position:relative;background:rgba(0,0,0,0.2)}
+.si::before{content:'';position:absolute;left:0;top:0;bottom:0;width:2px;transition:background .3s}
+.si.done::before{background:var(--cyan)}.si.act::before{background:var(--amber)}.si.lck::before{background:#1a2535}
+.si.done{border-color:rgba(0,245,255,.1);background:rgba(0,245,255,.03)}
+.si.act{border-color:rgba(255,183,3,.3);background:rgba(255,183,3,.08);box-shadow:inset 0 0 15px rgba(255,183,3,.05)}
+.si.lck{opacity:.4}
+.si-header{display:flex;align-items:center;gap:9px;}
+.sn{font-family:'Orbitron',monospace;font-size:10px;font-weight:700;width:18px;text-align:center}
+.si.done .sn{color:var(--cyan)}.si.act .sn{color:var(--amber)}.si.lck .sn{color:#2a3a50}
+.si-info .sname{font-size:11px;font-weight:600;color:var(--bright);letter-spacing:1px}.si-info .ssub{font-family:'Share Tech Mono',monospace;font-size:8px;color:var(--text);opacity:.6;letter-spacing:0.5px}
+.si.lck .sname{color:#3a4a60}
+.sbadge{margin-left:auto;font-family:'Share Tech Mono',monospace;font-size:7px;padding:3px 6px;white-space:nowrap}
+.si.done .sbadge{background:rgba(0,245,255,.1);color:var(--cyan);border:1px solid rgba(0,245,255,.2)}
+.si.act .sbadge{background:rgba(255,183,3,.1);color:var(--amber);border:1px solid rgba(255,183,3,.3);animation:blink 1.4s step-end infinite}
+.si.lck .sbadge{background:transparent;color:#2a3a50;border:1px solid #1a2535}
+
+/* INSTALL BUTTON */
+.install-btn{margin-top:10px;padding:6px;background:var(--amber);color:#000;border:none;font-family:'Orbitron',monospace;font-size:9px;font-weight:900;letter-spacing:2px;cursor:pointer;transition:all 0.2s;display:none;text-align:center}
+.si.act .install-btn{display:block}
+.install-btn:hover{background:#ffc833;box-shadow:0 0 10px rgba(255,183,3,0.5)}
+.install-btn:active{transform:scale(0.98)}
+
+/* PROGRESS BAR */
+.pb-wrap{margin-top:8px}.pb-lbl{display:flex;justify-content:space-between;margin-bottom:5px}
+.pb-lbl span{font-family:'Share Tech Mono',monospace;font-size:8px}
+.pbl{color:var(--cyan);opacity:.7;letter-spacing:2px}.pbv{color:var(--cyan);font-weight:700}
+.pb{height:3px;background:rgba(255,255,255,.05);border-radius:1px;overflow:hidden}
+.pbf{height:100%;width:0%;background:linear-gradient(90deg,var(--cyan),#0af);box-shadow:0 0 7px var(--cyan);transition:width 0.5s ease-out}
+
+/* RIGHT PANEL SPECS */
+.sr{display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid rgba(255,255,255,.04)}
+.sk{font-family:'Share Tech Mono',monospace;font-size:8px;color:var(--text);opacity:.5}
+.sv{font-family:'Share Tech Mono',monospace;font-size:8px;color:var(--bright)}
+.sv.c{color:var(--cyan)}.sv.a{color:var(--amber)}.sv.g{color:var(--green)}.sv.r{color:var(--red)}
+.abg{display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-top:5px}
+.ab{padding:8px 5px;font-family:'Share Tech Mono',monospace;font-size:8px;letter-spacing:1px;text-align:center;border:1px solid var(--border);background:rgba(0,245,255,.02);color:var(--text);cursor:pointer;transition:all .14s;user-select:none}
+.ab:hover{border-color:var(--cyan);color:var(--cyan);background:rgba(0,245,255,.07);box-shadow:0 0 10px rgba(0,245,255,.12)}
+.ab.on{border-color:var(--amber);color:var(--amber);background:rgba(255,183,3,.07);box-shadow:0 0 10px rgba(255,183,3,.18)}
+.ch{display:flex;flex-direction:column;gap:5px;margin-top:4px}
+.cr{display:flex;align-items:center;gap:7px;font-family:'Share Tech Mono',monospace;font-size:8px;color:var(--text);opacity:.6}
+.ck{padding:2px 5px;border:1px solid #1a2535;font-size:7px;color:var(--cyan);opacity:1;background:rgba(0,245,255,.04)}
+
+/* HUD BOT */
+.hud-bot{position:fixed;bottom:0;left:0;right:0;z-index:20;padding:8px 22px;display:flex;align-items:center;justify-content:space-evenly;background:linear-gradient(0deg,rgba(3,8,16,.98) 0%,transparent 100%);border-top:1px solid var(--border)}
+.hs{text-align:center; flex:1;}
+.hs .val{font-family:'Orbitron',monospace;font-size:18px;font-weight:900;color:var(--bright);line-height:1}
+.hs .val span{font-size:10px;color:var(--cyan)}
+.hs .lbl{font-family:'Share Tech Mono',monospace;font-size:7px;color:var(--text);opacity:.45;letter-spacing:2px;margin-top:2px}
+.hd{width:1px;height:28px;background:var(--border)}
+
+/* GREETING MODAL */
+#greeting {position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(0.9);background:rgba(4,12,26,0.95);border:2px solid var(--cyan);padding:40px 60px;text-align:center;color:var(--bright);opacity:0;pointer-events:none;transition:all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);z-index:100;box-shadow:0 0 50px rgba(0,245,255,0.4);backdrop-filter:blur(10px);}
+#greeting.show {opacity:1;transform:translate(-50%,-50%) scale(1);}
+#greeting .title {font-family:'Orbitron',sans-serif;font-size:28px;font-weight:900;color:var(--cyan);margin-bottom:12px;letter-spacing:4px;}
+#greeting .sub {font-family:'Share Tech Mono',monospace;font-size:14px;letter-spacing:3px;color:var(--bright);}
+
+/* FLASH FX & TOAST */
+#flash{position:fixed;inset:0;background:var(--cyan);z-index:90;opacity:0;pointer-events:none;transition:opacity 0.2s;}
+.toast{position:fixed;bottom:65px;left:50%;transform:translateX(-50%) translateY(16px);z-index:30;background:var(--panel);border:1px solid var(--cyan);padding:8px 18px;font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--cyan);letter-spacing:2px;opacity:0;transition:all .28s;pointer-events:none;backdrop-filter:blur(12px);box-shadow:0 0 18px rgba(0,245,255,.2);white-space:nowrap}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* LOADER */
+#loader{position:fixed;inset:0;z-index:100;background:var(--dark);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;transition:opacity .7s}
+.ll{font-family:'Orbitron',monospace;font-size:26px;font-weight:900;color:var(--bright);letter-spacing:8px}
+.ll span{color:var(--cyan)}
+.ls{font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--cyan);letter-spacing:4px;opacity:.7}
+.lbw{width:260px;height:2px;background:rgba(255,255,255,.05);border-radius:1px;overflow:hidden}
+.lb{height:100%;width:0;background:var(--cyan);box-shadow:0 0 8px var(--cyan);transition:width .08s linear}
+.lm{font-family:'Share Tech Mono',monospace;font-size:8px;color:var(--text);opacity:.5;letter-spacing:2px}
+@media(max-width:768px){.panel-l,.panel-r{display:none}}
+</style>
+</head>
+<body>
+<div id="loader">
+  <div class="ll">SANFUN<span>GROUP</span></div>
+  <div class="ls">ASSEMBLY BAY 04 — INITIALIZING</div>
+  <div class="lbw"><div class="lb" id="lb"></div></div>
+  <div class="lm" id="lm">LOADING BLUEPRINTS...</div>
+</div>
+<div id="flash"></div>
+
+<div id="greeting">
+   <div class="title">SYSTEMS ONLINE</div>
+   <div class="sub">Welcome to SanFun Group: a million lives a million dreams</div>
+</div>
+
+<canvas id="c"></canvas>
+<div class="scanlines"></div>
+<div class="vignette"></div>
+
+<!-- HUD TOP -->
+<header class="hud-top">
+  <div class="logo-block">
+    <div class="logo-icon" id="top-logo">
+      <svg viewBox="0 0 20 20" fill="none"><polygon points="10,2 17,6 17,14 10,18 3,14 3,6" stroke="#00f5ff" stroke-width="1.1" fill="rgba(0,245,255,.08)"/><circle cx="10" cy="10" r="2.2" fill="#00f5ff"/><line x1="10" y1="2" x2="10" y2="5.5" stroke="#00f5ff" stroke-width="1.1"/><line x1="17" y1="6" x2="14" y2="8" stroke="#00f5ff" stroke-width="1.1"/><line x1="17" y1="14" x2="14" y2="12" stroke="#00f5ff" stroke-width="1.1"/><line x1="10" y1="18" x2="10" y2="14.5" stroke="#00f5ff" stroke-width="1.1"/><line x1="3" y1="14" x2="6" y2="12" stroke="#00f5ff" stroke-width="1.1"/><line x1="3" y1="6" x2="6" y2="8" stroke="#00f5ff" stroke-width="1.1"/></svg>
+    </div>
+    <div><div class="t1">INTERN DEPLOYMENT MATRIX</div><div class="t2">HANGAR BAY 04 — AVATAR ASSEMBLY</div></div>
+  </div>
+  <div class="hud-center" id="hud-center-msg">// AWAITING MODULE INSTALLATION //</div>
+  <div style="display:flex;gap:10px">
+    <div class="status-pill"><div class="dot a" id="sys-dot"></div><span id="sys-txt" style="color:var(--amber)">BUILDING</span></div>
+  </div>
+</header>
+
+<!-- LEFT PANEL: ASSEMBLY STAGES -->
+<div class="panel-l">
+  <div class="card">
+    <div class="ct">ASSEMBLY SEQUENCE</div>
+    <div id="stages-container">
+      <!-- Generated via JS -->
+    </div>
+    <div class="pb-wrap">
+      <div class="pb-lbl"><span class="pbl">ASSEMBLY</span><span class="pbv" id="pb-val">0%</span></div>
+      <div class="pb"><div class="pbf" id="pb-fill"></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- RIGHT PANEL: TELEMETRY & CONTROLS -->
+<div class="panel-r" id="panel-controls">
+  <div class="card">
+    <div class="ct">ROBOT CONTROL</div>
+    <div class="abg">
+      <button class="ab on"  id="btn-idle"    onclick="setAnim('idle')">IDLE</button>
+      <button class="ab"     id="btn-march"   onclick="setAnim('march')">MARCH</button>
+      <button class="ab"     id="btn-wave"    onclick="setAnim('wave')">WAVE</button>
+      <button class="ab"     id="btn-punch"   onclick="setAnim('punch')">PUNCH</button>
+      <button class="ab"     id="btn-confirm" onclick="setAnim('confirm')">CONFIRM</button>
+      <button class="ab"     id="btn-approve" onclick="setAnim('approve')">APPROVE</button>
+      <button class="ab"     id="btn-alert"   onclick="setAnim('alert')">ALERT</button>
+      <button class="ab"     id="btn-spin"    onclick="setAnim('spin')">SPIN</button>
+    </div>
+  </div>
+  <div class="card">
+    <div class="ct">LIVE TELEMETRY</div>
+    <div class="sr"><span class="sk">STATUS</span><span class="sv g" id="lt-status">OPERATIONAL</span></div>
+    <div class="sr"><span class="sk">ANIMATION</span><span class="sv c" id="lanim">IDLE</span></div>
+    <div class="sr"><span class="sk">POWER CORE</span><span class="sv g" id="lt-power">100%</span></div>
+    <div class="sr"><span class="sk">OPTICS</span><span class="sv g" id="lt-optics">ONLINE</span></div>
+    <div class="sr"><span class="sk">UPTIME</span><span class="sv c" id="ltime">00:00</span></div>
+  </div>
+  <div class="card">
+    <div class="ct">PILOT CONTROLS</div>
+    <div class="ch">
+      <div class="cr"><span class="ck">W A S D</span><span style="color:var(--cyan)">Drive Avatar</span></div>
+      <div class="cr"><span class="ck">DRAG</span><span>Orbit view</span></div>
+      <div class="cr"><span class="ck">SCROLL</span><span>Zoom</span></div>
+      <div class="cr"><span class="ck">R-DRAG</span><span>Pan view</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- HUD BOT -->
+<div class="hud-bot">
+  <div class="hs"><div class="val" id="b-stage">0<span>/7</span></div><div class="lbl">STAGES BUILT</div></div>
+  <div class="hd"></div>
+  <div class="hs"><div class="val">1<span>d</span></div><div class="lbl">TO DEPLOY</div></div>
+  <div class="hd"></div>
+  <div class="hs"><div class="val" id="b-sys" style="color:var(--text)">OFFLINE</div><div class="lbl">SYSTEM STATE</div></div>
+  <div class="hd"></div>
+  <div class="hs"><div class="val" style="font-size:11px;color:var(--text);letter-spacing:1px" id="b-msg">INITIALIZE ORIENTATION</div><div class="lbl">CURRENT DIRECTIVE</div></div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+/* ── DATA & STATE ── */
+const STAGES = [
+  { id: 1, name: 'CHASSIS', sub: 'Culture & Mission', action: 'INSTALL CHASSIS' },
+  { id: 2, name: 'POWER CORE', sub: 'Logistics & Access', action: 'INSERT CORE' },
+  { id: 3, name: 'LEGS', sub: 'Workspace Navigation', action: 'ATTACH MOBILITY' },
+  { id: 4, name: 'ARMS', sub: 'Tools & IDE', action: 'MOUNT MANIPULATORS' },
+  { id: 5, name: 'SENSORS', sub: 'Team & Comms', action: 'CONNECT OPTICS' },
+  { id: 6, name: 'CPU', sub: 'Security Training', action: 'EMBED NEURAL NET' },
+  { id: 7, name: 'THE SPARK', sub: 'Final Deployment', action: 'IGNITE SPARK' }
+];
+
+let currentStage = 1;
+let isFullyAssembled = false;
+const keyState = { w: false, a: false, s: false, d: false };
+
+/* ── UI GENERATION ── */
+function renderUI() {
+  const container = document.getElementById('stages-container');
+  container.innerHTML = '';
+  
+  STAGES.forEach(st => {
+    let stateClass = 'lck';
+    let badgeText = 'LOCKED';
+    
+    if (st.id < currentStage) {
+      stateClass = 'done';
+      badgeText = 'INSTALLED';
+    } else if (st.id === currentStage) {
+      stateClass = 'act';
+      badgeText = 'AWAITING';
+    }
+    
+    const div = document.createElement('div');
+    div.className = `si ${stateClass}`;
+    div.innerHTML = `
+      <div class="si-header">
+        <div class="sn">0${st.id}</div>
+        <div class="si-info"><div class="sname">${st.name}</div><div class="ssub">${st.sub}</div></div>
+        <div class="sbadge">${badgeText}</div>
+      </div>
+      <button class="install-btn" onclick="installPart(${st.id})">${st.action}</button>
+    `;
+    container.appendChild(div);
+  });
+
+  const pct = Math.floor(((currentStage - 1) / 7) * 100);
+  document.getElementById('pb-val').textContent = pct + '%';
+  document.getElementById('pb-fill').style.width = pct + '%';
+  document.getElementById('b-stage').innerHTML = `${currentStage - 1}<span>/7</span>`;
+}
+renderUI();
+
+/* ── LOADER ── */
+const lbEl=document.getElementById('lb'), lmEl=document.getElementById('lm');
+const lmsgs=['CONNECTING TO MONDAY.COM...','LOADING USER PROFILE...','SYNCING HANGAR GRID...','GENERATING BLUEPRINTS...','READY FOR ASSEMBLY.'];
+let pct=0;
+const li=setInterval(()=>{
+  pct=Math.min(pct+Math.random()*20+5,100);
+  lbEl.style.width=pct+'%';
+  lmEl.textContent=lmsgs[Math.min(Math.floor(pct/22),4)];
+  if(pct>=100){
+    clearInterval(li);
+    setTimeout(()=>{
+      const el=document.getElementById('loader');
+      el.style.opacity='0';
+      setTimeout(()=>el.style.display='none',700);
+      showToast('>> HANGAR 04 READY. BEGIN ASSEMBLY.');
+    },400);
+  }
+},70);
+
+/* ── RENDERER & CAMERA ── */
+const canvas=document.getElementById('c');
+const renderer=new THREE.WebGLRenderer({canvas,antialias:true});
+renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+renderer.setSize(innerWidth,innerHeight);
+renderer.shadowMap.enabled=true;
+renderer.shadowMap.type=THREE.PCFSoftShadowMap;
+renderer.toneMapping=THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure=0.9;
+renderer.outputEncoding=THREE.sRGBEncoding;
+
+const scene=new THREE.Scene();
+scene.background=new THREE.Color(0x030810);
+scene.fog=new THREE.FogExp2(0x030810,0.032);
+
+const cam=new THREE.PerspectiveCamera(42,innerWidth/innerHeight,0.1,200);
+cam.position.set(0,2.5,12);
+
+let dragging=false,rightBtn=false,prev={x:0,y:0};
+let sph={theta:0.3,phi:1.3,r:11},tSph={theta:0.3,phi:1.3,r:11};
+let pan=new THREE.Vector3(0,1,0),tPan=new THREE.Vector3(0,1,0);
+
+canvas.addEventListener('mousedown',e=>{dragging=true;rightBtn=e.button===2;prev={x:e.clientX,y:e.clientY}});
+canvas.addEventListener('contextmenu',e=>e.preventDefault());
+window.addEventListener('mouseup',()=>dragging=false);
+window.addEventListener('mousemove',e=>{
+  if(!dragging)return;
+  const dx=e.clientX-prev.x,dy=e.clientY-prev.y; prev={x:e.clientX,y:e.clientY};
+  if(!rightBtn){tSph.theta-=dx*.007;tSph.phi=Math.max(.1,Math.min(Math.PI*.9,tSph.phi+dy*.006))}
+  else{tPan.x-=dx*.012;tPan.y+=dy*.012}
+});
+canvas.addEventListener('wheel',e=>{tSph.r=Math.max(4,Math.min(20,tSph.r+e.deltaY*.012))},{passive:true});
+
+function updateCam(){
+  sph.theta+=(tSph.theta-sph.theta)*.08;sph.phi+=(tSph.phi-sph.phi)*.08;sph.r+=(tSph.r-sph.r)*.08;
+  pan.lerp(tPan,.08);
+  cam.position.set(sph.r*Math.sin(sph.phi)*Math.sin(sph.theta)+pan.x,sph.r*Math.cos(sph.phi)+2+pan.y,sph.r*Math.sin(sph.phi)*Math.cos(sph.theta));
+  cam.lookAt(pan.x,2+pan.y,pan.z);
+}
+
+/* ── LIGHTS ── */
+scene.add(new THREE.AmbientLight(0x0a1a2e, 2.5));
+const sun=new THREE.DirectionalLight(0xffeedd,1.5);
+sun.position.set(4,14,6);sun.castShadow=true;
+sun.shadow.mapSize.set(2048,2048);
+sun.shadow.camera.near=.5;sun.shadow.camera.far=50;
+sun.shadow.camera.left=-10;sun.shadow.camera.right=10;
+sun.shadow.camera.top=10;sun.shadow.camera.bottom=-10;
+sun.shadow.bias=-.001;
+scene.add(sun);
+
+// Dynamic Lights (Turn on fully at Spark)
+const cR=new THREE.PointLight(0x00f5ff, 0, 22); cR.position.set(-7,5,-2); scene.add(cR);
+const rR=new THREE.PointLight(0xe63946, 0, 16); rR.position.set(6,4,-4); scene.add(rR);
+const ugL=new THREE.PointLight(0x00f5ff, 0, 8); ugL.position.set(0,.1,0); scene.add(ugL);
+
+/* ── MATERIALS ── */
+function mat(col,rough=.4,metal=.85,emissive=0,emInt=0,trans=false,op=1){
+  return new THREE.MeshStandardMaterial({color:col,roughness:rough,metalness:metal,emissive,emissiveIntensity:emInt,transparent:trans,opacity:op});
+}
+
+// "Cold" unactivated materials
+const MC = {
+  main:  mat(0x2a3a50, .5, .7),       
+  dark:  mat(0x1a2535, .6, .5),       
+  silv:  mat(0x68788a, .3, 1.0),      
+  acc:   mat(0x304050, .4, .8),       
+  eye:   mat(0x000000, 0, 0, 0x000000, 0), 
+  wind:  mat(0x051222, .1, .9, 0x000000, 0, true, .9), 
+  gold:  mat(0x443322, .4, .8)
+};
+
+// "Hot" activated colors to lerp to
+const MCHot = {
+  main: new THREE.Color(0xcc2233), 
+  acc:  new THREE.Color(0x1a3a70), 
+  eyeE: new THREE.Color(0x00f5ff), 
+  windE:new THREE.Color(0x003388)
+};
+
+/* ── HELPERS ── */
+function B(w,h,d,m,x=0,y=0,z=0,rx=0,ry=0,rz=0){const o=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),m);o.position.set(x,y,z);o.rotation.set(rx,ry,rz);o.castShadow=true;o.receiveShadow=true;return o}
+function C(rt,rb,h,s,m,x=0,y=0,z=0,rx=0){const o=new THREE.Mesh(new THREE.CylinderGeometry(rt,rb,h,s),m);o.position.set(x,y,z);o.rotation.x=rx;o.castShadow=true;return o}
+function S(r,m,x=0,y=0,z=0){const o=new THREE.Mesh(new THREE.SphereGeometry(r,16,12),m);o.position.set(x,y,z);o.castShadow=true;return o}
+
+/* ── ROBOT ASSEMBLY GROUPS ── */
+const robot=new THREE.Group(); robot.position.y=.05; scene.add(robot);
+
+// Animation Wrappers
+const torsoG=new THREE.Group(); torsoG.position.y=2.5; 
+const headG=new THREE.Group(); headG.position.y=1.0; 
+const armR=new THREE.Group(); armR.position.set(1.08,.35,0); 
+const armL=new THREE.Group(); armL.position.set(-1.08,.35,0); 
+const legR=new THREE.Group(); legR.position.set(.42,-1.16,0); 
+const legL=new THREE.Group(); legL.position.set(-.42,-1.16,0); 
+
+// The Assembly Parts
+const p1_Chassis = new THREE.Group(); torsoG.add(p1_Chassis);
+const p2_Core = new THREE.Group(); torsoG.add(p2_Core);
+const p3_Legs = new THREE.Group(); robot.add(p3_Legs);
+const p4_Arms = new THREE.Group(); torsoG.add(p4_Arms);
+const p5_Sensors = new THREE.Group(); headG.add(p5_Sensors);
+const p6_CPU = new THREE.Group(); headG.add(p6_CPU);
+const p7_Spark = new THREE.Group(); torsoG.add(p7_Spark);
+
+// Attach Sub-rigs
+robot.add(torsoG);
+torsoG.add(headG);
+p3_Legs.add(legR); p3_Legs.add(legL);
+p4_Arms.add(armR); p4_Arms.add(armL);
+
+// 1. CHASSIS
+p1_Chassis.add(B(1.6,1.3,.85,MC.main));                    
+p1_Chassis.add(B(.25,1.1,.7,MC.acc,.9,0,0));               
+p1_Chassis.add(B(.25,1.1,.7,MC.acc,-.9,0,0));              
+p1_Chassis.add(B(1.4,.18,.7,MC.dark,0,.66,0));             
+p1_Chassis.add(B(1.2,.5,.7,MC.acc,0,-.9,0));               
+p1_Chassis.add(B(.35,.35,.75,MC.main,.38,-.9,0));          
+p1_Chassis.add(B(.35,.35,.75,MC.main,-.38,-.9,0));         
+p1_Chassis.add(B(1.6,.16,.8,MC.dark,0,-1.16,0));           
+p1_Chassis.add(S(.28,MC.silv,1.08,.35,0));                 
+p1_Chassis.add(S(.28,MC.silv,-1.08,.35,0));                
+p1_Chassis.add(B(1.05,.28,.7,MC.dark,0,-1.22,0));          
+
+// 2. POWER CORE
+p2_Core.add(B(.8,.5,.1,MC.wind,0,.15,.43));             
+p2_Core.add(B(1.0,.18,.12,MC.silv,0,-.42,.42));         
+p2_Core.add(C(.07,.07,.8,8,MC.dark,.7,.5,-.3,.15));     
+p2_Core.add(C(.07,.07,.8,8,MC.dark,-.7,.5,-.3,-.15));   
+
+// 3. LEGS
+function mkLeg(g){
+  g.add(B(.52,.22,.58,MC.main,0,0,0));          
+  g.add(B(.44,.9,.46,MC.acc,0,-.58,0));         
+  g.add(B(.5,.12,.5,MC.main,0,-.12,0));         
+  g.add(C(.18,.18,.14,10,MC.silv,0,-1.06,0,Math.PI/2)); 
+  g.add(B(.4,.88,.44,MC.main,0,-1.55,0));       
+  g.add(B(.46,.14,.48,MC.dark,0,-1.1,0));       
+  g.add(B(.28,.5,.06,MC.acc,0,-1.55,.26));      
+  g.add(B(.42,.16,.44,MC.dark,0,-2.02,0));      
+  g.add(B(.44,.18,.7,MC.main,0,-2.22,.12));     
+  g.add(B(.38,.12,.18,MC.acc,0,-2.22,.52));     
+}
+mkLeg(legR); mkLeg(legL);
+
+// 4. ARMS
+function mkArm(g){
+  g.add(B(.38,.85,.38,MC.main,0,-.42,0));       
+  g.add(B(.44,.12,.42,MC.dark,0,-.06,0));       
+  g.add(C(.17,.17,.12,10,MC.silv,0,-.88,0,Math.PI/2)); 
+  g.add(B(.32,.7,.32,MC.acc,0,-1.24,0));        
+  g.add(B(.36,.1,.36,MC.dark,0,-1.6,0));        
+  g.add(B(.28,.28,.28,MC.main,0,-1.9,0));       
+  g.add(B(.46,.22,.5,MC.main,.08,.08,0));       
+}
+mkArm(armR); mkArm(armL);
+
+// 5. SENSORS (Head Base)
+p5_Sensors.add(C(.17,.2,.3,8,MC.dark,0,-.18,0));           
+p5_Sensors.add(B(.8,.65,.65,MC.main,0,.18,0));             
+p5_Sensors.add(B(.7,.22,.6,MC.main,0,.55,0));              
+p5_Sensors.add(B(.55,.38,.08,MC.silv,0,.16,.33));          
+
+// 6. CPU (Details)
+p6_CPU.add(B(.14,.32,.12,MC.acc,0,.64,.28));          
+p6_CPU.add(B(.1,.32,.12,MC.acc,.43,.22,0));           
+p6_CPU.add(B(.1,.32,.12,MC.acc,-.43,.22,0));          
+p6_CPU.add(B(.4,.12,.1,MC.dark,0,-.02,.32));          
+p6_CPU.add(B(.18,.08,.05,MC.gold,0,.44,.32));         
+
+// 7. SPARK (Lights)
+const eyeR=S(.075,MC.eye,.16,.24,.34); p7_Spark.add(eyeR);
+const eyeL=S(.075,MC.eye,-.16,.24,.34); p7_Spark.add(eyeL);
+const eLR=new THREE.PointLight(0x00f5ff,0,1.5); eLR.position.set(.16,.24,.4); p7_Spark.add(eLR);
+const eLL=new THREE.PointLight(0x00f5ff,0,1.5); eLL.position.set(-.16,.24,.4); p7_Spark.add(eLL);
+const coreLight=new THREE.PointLight(0x00f5ff,0,4); coreLight.position.set(0,.15,.5); p7_Spark.add(coreLight);
+
+/* ── ASSEMBLY LOGIC ── */
+const partData = {
+  1: { grp: p1_Chassis, rack: [0, 8, -5], scale: 1, installed: false, active: true },
+  2: { grp: p2_Core, rack: [5, 4, -2], scale: 1.5, installed: false, active: false },
+  3: { grp: p3_Legs, rack: [-5, 0, -3], scale: 1, installed: false, active: false },
+  4: { grp: p4_Arms, rack: [5, 2, -4], scale: 1, installed: false, active: false },
+  5: { grp: p5_Sensors, rack: [-4, 6, -2], scale: 1.5, installed: false, active: false },
+  6: { grp: p6_CPU, rack: [4, 7, 0], scale: 2, installed: false, active: false },
+  7: { grp: p7_Spark, rack: [0, 2, 5], scale: 1, installed: false, active: false }
+};
+
+window.installPart = function(id) {
+  if (id !== currentStage || isFullyAssembled) return;
+  
+  const part = partData[id];
+  part.installed = true;
+  part.active = false;
+  
+  showToast(`>> ${STAGES[id-1].name} INSTALLED SUCCESSFULLY`);
+  
+  currentStage++;
+  
+  if (currentStage <= 7) {
+    partData[currentStage].active = true;
+  } else {
+    activateRobot();
+  }
+  
+  renderUI();
+}
+
+function activateRobot() {
+  isFullyAssembled = true;
+  
+  // Flash effect
+  const flash = document.getElementById('flash');
+  flash.style.opacity = '1';
+  setTimeout(() => flash.style.opacity = '0', 300);
+  
+  // Show Greeting
+  const greeting = document.getElementById('greeting');
+  greeting.classList.add('show');
+  setTimeout(() => greeting.classList.remove('show'), 6000);
+  
+  // Update HUD
+  document.getElementById('sys-dot').className = 'dot g';
+  document.getElementById('sys-txt').style.color = 'var(--green)';
+  document.getElementById('sys-txt').textContent = 'ONLINE';
+  
+  document.getElementById('hud-center-msg').textContent = '// OVERRIDE COMPLETE: MANUAL CONTROL ENGAGED //';
+  document.getElementById('b-sys').textContent = 'ONLINE';
+  document.getElementById('b-sys').style.color = 'var(--cyan)';
+  document.getElementById('b-msg').textContent = 'AWAITING YOUR COMMAND';
+  
+  // Unlock Right Panel
+  document.getElementById('panel-controls').classList.add('unlocked');
+  
+  // Turn on lights
+  eLR.intensity = 2;
+  eLL.intensity = 2;
+  coreLight.intensity = 3;
+  cR.intensity = 1.5;
+  rR.intensity = 1.0;
+  ugL.intensity = 1.0;
+  
+  showToast('>> SPARK IGNITED. ALL SYSTEMS ONLINE.');
+  setAnim('wave'); 
+}
+
+/* ── CONTROLS (WASD) ── */
+window.addEventListener('keydown', e => {
+  const k = e.key.toLowerCase();
+  if(keyState.hasOwnProperty(k)) keyState[k] = true;
+});
+window.addEventListener('keyup', e => {
+  const k = e.key.toLowerCase();
+  if(keyState.hasOwnProperty(k)) keyState[k] = false;
+});
+
+/* ── HANGAR SCENERY ── */
+const floorM=new THREE.Mesh(new THREE.PlaneGeometry(50,50),mat(0x06101e,.95,.05));
+floorM.rotation.x=-Math.PI/2;floorM.receiveShadow=true;scene.add(floorM);
+const grid=new THREE.GridHelper(50,50,0x00f5ff,0x091520);
+grid.material.opacity=.22;grid.material.transparent=true;scene.add(grid);
+
+[1.8,3.0,4.5].forEach((r,i)=>{
+  const m=new THREE.Mesh(new THREE.RingGeometry(r-.02,r,64),new THREE.MeshBasicMaterial({color:0x00f5ff,transparent:true,opacity:[.18,.09,.05][i],side:THREE.DoubleSide}));
+  m.rotation.x=-Math.PI/2;m.position.y=.01;scene.add(m);
+});
+
+const wM=mat(0x040c18,1,.0);
+function wall(w,h,px,py,pz,ry=0){const m=new THREE.Mesh(new THREE.PlaneGeometry(w,h),wM);m.position.set(px,py,pz);m.rotation.y=ry;scene.add(m)}
+wall(40,16,0,8,-13);wall(26,16,-16,8,0,Math.PI/2);wall(26,16,16,8,0,-Math.PI/2);
+
+const sM=mat(0x091826,.7,.5);
+for(let i=-5;i<=5;i++){const s=new THREE.Mesh(new THREE.BoxGeometry(.13,12,.25),sM);s.position.set(i*2.4,6,-12.9);scene.add(s)}
+
+/* ── ANIMATION SYSTEM ── */
+let curAnim='idle';
+const AS={
+  idle:   {bob:.04,spd:1.2,sway:.01,dur:0},
+  march:  {bob:.12,spd:6.0,sway:.08,dur:0},
+  wave:   {bob:.02,spd:1.0,sway:0,  dur:2.5},
+  punch:  {bob:.02,spd:1.0,sway:0,  dur:1.2},
+  confirm:{bob:0,  spd:0,  sway:0,  dur:2.0},
+  approve:{bob:.05,spd:2,  sway:.04,dur:2.0},
+  alert:  {bob:.06,spd:5,  sway:.08,dur:2.5},
+  spin:   {bob:0,  spd:0,  sway:0,  dur:2.0},
+};
+const OS=new Set(['wave','punch','confirm','approve','alert','spin']);
+let atimer=0,prevA='idle';
+
+function setAnim(n){
+  if(!isFullyAssembled) {
+    showToast('>> ERROR: AVATAR NOT FULLY ASSEMBLED.');
+    return;
+  }
+  if(!AS[n])return;
+  document.querySelectorAll('.ab').forEach(b=>b.classList.remove('on'));
+  const btn=document.getElementById('btn-'+n);if(btn)btn.classList.add('on');
+  if(OS.has(n)){prevA=curAnim;atimer=0}
+  curAnim=n;
+  document.getElementById('lanim').textContent=n.toUpperCase();
+}
+window.setAnim=setAnim;
+
+/* ── TOAST ── */
+let toastT2;
+function showToast(msg){
+  const el=document.getElementById('toast');
+  el.textContent=msg;el.classList.add('show');
+  clearTimeout(toastT2);
+  toastT2=setTimeout(()=>el.classList.remove('show'),2400)
+}
+
+/* ── MAIN RENDER LOOP ── */
+const clock=new THREE.Clock();
+
+function tick(){
+  requestAnimationFrame(tick);
+  const dt=clock.getDelta(),t=clock.getElapsedTime();
+
+  // 1. Assembly Lerping Logic
+  Object.keys(partData).forEach(id => {
+    const p = partData[id];
+    
+    if (p.installed) {
+      // Move to local origin inside its parent group
+      p.grp.position.lerp(new THREE.Vector3(0,0,0), 0.08);
+      p.grp.quaternion.slerp(new THREE.Quaternion(), 0.08);
+      p.grp.scale.lerp(new THREE.Vector3(1,1,1), 0.08);
+    } 
+    else if (p.active) {
+      // Float at rack position
+      const targetY = p.rack[1] + Math.sin(t*2)*0.2;
+      p.grp.position.lerp(new THREE.Vector3(p.rack[0], targetY, p.rack[2]), 0.05);
+      p.grp.rotation.y += 0.01;
+      p.grp.scale.lerp(new THREE.Vector3(p.scale, p.scale, p.scale), 0.1);
+    } 
+    else {
+      p.grp.scale.set(0,0,0);
+    }
+  });
+
+  // 2. Procedural Animation & Movement (Only if fully assembled)
+  if (isFullyAssembled) {
+    // Lerp colors to HOT state
+    MC.main.color.lerp(MCHot.main, 0.02);
+    MC.acc.color.lerp(MCHot.acc, 0.02);
+    MC.eye.emissive.lerp(MCHot.eyeE, 0.05);
+    MC.eye.emissiveIntensity += (2 - MC.eye.emissiveIntensity) * 0.05;
+    MC.wind.emissive.lerp(MCHot.windE, 0.02);
+    MC.wind.emissiveIntensity += (1.5 - MC.wind.emissiveIntensity) * 0.05;
+    
+    // Pulse lights
+    cR.intensity=1.5+Math.sin(t*1.8)*.5;
+    rR.intensity=1.0+Math.sin(t*2.1)*.2;
+    ugL.intensity=1.0+Math.sin(t*1.5)*.3;
+
+    // --- WASD Movement ---
+    let dx = 0, dz = 0;
+    const spd = dt * 6;
+    if(keyState.w) dz -= spd;
+    if(keyState.s) dz += spd;
+    if(keyState.a) dx -= spd;
+    if(keyState.d) dx += spd;
+
+    if(dx !== 0 || dz !== 0) {
+      robot.position.x += dx;
+      robot.position.z += dz;
+      
+      // Make camera pan follow the robot
+      tPan.copy(robot.position);
+      
+      // Rotate robot towards movement
+      const tgtA = Math.atan2(dx, dz);
+      let diff = tgtA - robot.rotation.y;
+      while(diff < -Math.PI) diff += Math.PI*2;
+      while(diff > Math.PI) diff -= Math.PI*2;
+      robot.rotation.y += diff * 0.15;
+
+      if(curAnim !== 'march' && !OS.has(curAnim)) setAnim('march');
+    } else if (curAnim === 'march') {
+      setAnim('idle');
+    }
+
+    // --- IK / Procedural Joint Animations ---
+    const s=AS[curAnim]||AS.idle;
+    if(OS.has(curAnim)){
+      atimer+=dt;
+      if(atimer>=s.dur){
+        curAnim=prevA;
+        document.querySelectorAll('.ab').forEach(b=>b.classList.remove('on'));
+        const pb=document.getElementById('btn-'+prevA);if(pb)pb.classList.add('on');
+        document.getElementById('lanim').textContent=prevA.toUpperCase();
+      }
+    }
+
+    // Body bob/sway
+    robot.position.y=Math.sin(t*s.spd)*s.bob + 0.05;
+    robot.rotation.z=Math.sin(t*s.spd*.5)*s.sway*.3;
+
+    // Head
+    if(curAnim==='confirm'){headG.rotation.x=Math.sin(t*6)*.25}
+    else{headG.rotation.x+=(0-headG.rotation.x)*.1}
+    if(curAnim==='idle'){headG.rotation.y=Math.sin(t*.4)*.18}
+    else{headG.rotation.y+=(0-headG.rotation.y)*.08}
+
+    // March legs
+    if(curAnim==='march'){
+      const sw=Math.sin(t*s.spd)*.4;
+      legR.rotation.x=sw;legL.rotation.x=-sw;
+      armR.rotation.x=-sw*.5;armL.rotation.x=sw*.5;
+    }else{
+      legR.rotation.x+=(0-legR.rotation.x)*.12;legL.rotation.x+=(0-legL.rotation.x)*.12;
+      if(curAnim!=='punch'){armR.rotation.x+=(0-armR.rotation.x)*.1}
+      armL.rotation.x+=(0-armL.rotation.x)*.1;
+    }
+
+    // Wave right arm
+    if(curAnim==='wave'){
+      const wt=atimer/s.dur;
+      armR.rotation.z=-Math.PI*.85*Math.sin(Math.PI*wt);
+      armR.rotation.x=Math.sin(t*8)*.18*Math.sin(Math.PI*wt);
+    }else if(curAnim!=='punch'&&curAnim!=='approve'){
+      armR.rotation.z+=(0-armR.rotation.z)*.1;
+      armR.rotation.x+=(0-armR.rotation.x)*.1;
+    }
+
+    // Punch
+    if(curAnim==='punch'){
+      armR.rotation.x=-Math.PI*.9*Math.sin(Math.PI*atimer/s.dur*1.8)*.8;
+      armR.rotation.z=0;
+    }
+
+    // Approve arms up
+    if(curAnim==='approve'){
+      const raise=-Math.PI*.7*Math.sin(Math.PI*atimer/s.dur);
+      armR.rotation.z=raise;armL.rotation.z=-raise;
+    }else{armL.rotation.z+=(0-armL.rotation.z)*.1}
+
+    // Alert tremor
+    if(curAnim==='alert'){
+      robot.position.x += Math.sin(t*28)*.02; // Small shake added to world X
+    }
+
+    // Spin
+    if(curAnim==='spin'){robot.rotation.y+=dt*Math.PI*3}
+  }
+
+  // Update Telemetry UI
+  const el=Math.floor(t);
+  document.getElementById('ltime').textContent=String(Math.floor(el/60)).padStart(2,'0')+':'+String(el%60).padStart(2,'0');
+
+  updateCam();
+  renderer.render(scene,cam);
+}
+tick();
+
+window.addEventListener('resize',()=>{
+  cam.aspect=innerWidth/innerHeight;
+  cam.updateProjectionMatrix();
+  renderer.setSize(innerWidth,innerHeight);
+});
+</script>
+</body>
+</html>
