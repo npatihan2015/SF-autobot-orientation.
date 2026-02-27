@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>SanFun Group — G-Type Assembly</title>
+<title>SanFun Group — Optimus Prime Assembly</title>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@400;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet"/>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -11,12 +11,10 @@
 html,body{width:100%;height:100%;overflow:hidden;background:var(--dark);user-select:none;font-family:'Rajdhani',sans-serif;color:var(--text)}
 #c{position:fixed;inset:0;width:100%;height:100%;display:block;cursor:crosshair}
 
-/* CINEMATIC OVERLAYS */
-.scanlines{position:fixed;inset:0;pointer-events:none;z-index:5;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.1) 2px,rgba(0,0,0,0.1) 4px)}
-.vignette{position:fixed;inset:0;pointer-events:none;z-index:4;background:radial-gradient(circle at center,transparent 20%,rgba(0,2,5,0.95) 100%)}
+.vignette{position:fixed;inset:0;pointer-events:none;z-index:4;background:radial-gradient(circle at center,transparent 20%,rgba(0,2,5,0.8) 100%)}
 
 /* HUD STRUCTURE */
-.hud-top{position:fixed;top:0;left:0;right:0;z-index:20;display:flex;align-items:center;justify-content:space-between;padding:15px 30px;background:linear-gradient(180deg,rgba(0,5,12,.9) 0%,transparent 100%);border-bottom:1px solid rgba(0,255,255,0.15)}
+.hud-top{position:fixed;top:0;left:0;right:0;z-index:20;display:flex;align-items:center;justify-content:space-between;padding:15px 30px;background:linear-gradient(180deg,rgba(0,5,12,.95) 0%,transparent 100%);border-bottom:1px solid rgba(0,255,255,0.15)}
 .logo-block{display:flex;align-items:center;gap:15px}
 .logo-icon{width:40px;height:40px;border:1px solid var(--cyan);display:flex;align-items:center;justify-content:center;box-shadow:0 0 15px rgba(0,255,255,.2); position:relative}
 .logo-icon::after{content:'';position:absolute;inset:-4px;border:1px solid rgba(0,255,255,0.5);border-radius:2px;animation:spin 10s linear infinite}
@@ -65,7 +63,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--dark);user-sel
 .sr{display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid rgba(255,255,255,.03)}
 .sk{font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--text);opacity:.7;letter-spacing:1px}
 .sv{font-family:'Share Tech Mono',monospace;font-size:10px;font-weight:700;letter-spacing:1px}
-.sv.c{color:var(--cyan); text-shadow: 0 0 8px rgba(0,255,255,0.5)}.sv.a{color:var(--gold); text-shadow: 0 0 8px rgba(255,204,0,0.5)}.sv.g{color:var(--green); text-shadow: 0 0 8px rgba(0,255,102,0.5)}
+.sv.c{color:var(--cyan); text-shadow: 0 0 8px rgba(0,255,255,0.5)}.sv.a{color:var(--gold); text-shadow: 0 0 8px rgba(255,204,0,0.5)}.sv.g{color:var(--green); text-shadow: 0 0 8px rgba(0,255,102,0.5)}.sv.r{color:var(--red); text-shadow: 0 0 8px rgba(230,0,0,0.5)}
 
 /* ACTION GRID */
 .abg{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:5px}
@@ -121,9 +119,9 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--dark);user-sel
 </head>
 <body>
 <div id="loader">
-  <div class="ll">G-TYPE<span>INIT</span></div>
+  <div class="ll">PRIME<span>INIT</span></div>
   <div class="lbw"><div class="lb" id="lb"></div></div>
-  <div class="lm" id="lm">CONNECTING NEURAL LINK...</div>
+  <div class="lm" id="lm">LOADING GLTF ASSETS...</div>
 </div>
 
 <div id="flash"></div>
@@ -140,12 +138,11 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--dark);user-sel
 </div>
 
 <div id="greeting">
-   <div class="title">SYSTEM AWAKENED</div>
-   <div class="sub">Welcome to SanFun Group: a million lives a million dreams</div>
+   <div class="title">PRIME AWAKENED</div>
+   <div class="sub">Autobots, Roll Out! Welcome to SanFun Group.</div>
 </div>
 
 <canvas id="c"></canvas>
-<div class="scanlines"></div>
 <div class="vignette"></div>
 
 <header class="hud-top">
@@ -153,7 +150,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--dark);user-sel
     <div class="logo-icon">
       <svg viewBox="0 0 20 20" fill="none"><polygon points="10,2 17,6 17,14 10,18 3,14 3,6" stroke="#00ffff" stroke-width="1.5" fill="rgba(0,255,255,.1)"/><circle cx="10" cy="10" r="3" fill="#00ffff"/></svg>
     </div>
-    <div><div class="t1">SANFUN G-FRAME PROGRAM</div><div class="t2">HANGAR BAY 04 — MOBILE SUIT ASSEMBLY</div></div>
+    <div><div class="t1">OPTIMUS PRIME PROTOCOL</div><div class="t2">HANGAR BAY 04 — LEADER CLASS ASSEMBLY</div></div>
   </div>
   <button onclick="resetProgress()" style="background:transparent; border:1px solid var(--border); color:var(--text); font-family:'Orbitron',sans-serif; font-size:9px; font-weight:700; letter-spacing:2px; padding:8px 15px; cursor:pointer; transition:all 0.3s">SYSTEM RESET</button>
 </header>
@@ -174,13 +171,9 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--dark);user-sel
     <div class="ct">NEURAL OVERRIDE</div>
     <div class="abg">
       <button class="ab on"  id="btn-idle"    onclick="setAnim('idle')">STANDBY</button>
-      <button class="ab"     id="btn-march"   onclick="setAnim('march')">SORTIE</button>
-      <button class="ab"     id="btn-wave"    onclick="setAnim('wave')">SALUTE</button>
-      <button class="ab"     id="btn-punch"   onclick="setAnim('punch')">STRIKE</button>
-      <button class="ab"     id="btn-confirm" onclick="setAnim('confirm')">AFFIRM</button>
-      <button class="ab"     id="btn-approve" onclick="setAnim('approve')">PRAISE</button>
-      <button class="ab"     id="btn-alert"   onclick="setAnim('alert')">COMBAT</button>
-      <button class="ab"     id="btn-spin"    onclick="setAnim('spin')">EVADE</button>
+      <button class="ab"     id="btn-march"   onclick="setAnim('walk')">ROLL OUT</button>
+      <button class="ab"     id="btn-wave"    onclick="setAnim('attack')">COMBAT</button>
+      <button class="ab"     id="btn-punch"   onclick="setAnim('run')">SPRINT</button>
     </div>
   </div>
   <div class="card">
@@ -188,7 +181,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--dark);user-sel
     <div class="sr"><span class="sk">CORE TEMP</span><span class="sv c" id="ltemp">3200 K</span></div>
     <div class="sr"><span class="sk">ANIMATION</span><span class="sv c" id="lanim">IDLE</span></div>
     <div class="sr"><span class="sk">REACTOR</span><span class="sv g" id="lt-power">NOMINAL</span></div>
-    <div class="sr"><span class="sk">TRANS-AM</span><span class="sv c" id="lt-trans">STANDBY</span></div>
+    <div class="sr"><span class="sk">OVERDRIVE</span><span class="sv c" id="lt-trans">STANDBY</span></div>
   </div>
 </div>
 
@@ -199,15 +192,16 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--dark);user-sel
   </div>
   <div class="hb-center" style="text-align:center">
      <div style="font-family:'Orbitron',sans-serif;font-size:12px;font-weight:900;letter-spacing:5px;color:var(--bright);margin-bottom:5px" id="b-msg">AWAITING PILOT INPUT</div>
-     <div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--cyan);opacity:0.6;letter-spacing:2px">W A S D TO MOVE • HOLD SHIFT FOR TRANS-AM • MOUSE TO LOOK</div>
+     <div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--cyan);opacity:0.6;letter-spacing:2px">W A S D TO MOVE • MOUSE TO LOOK</div>
   </div>
   <div class="hb-right">
      <div class="hs" style="text-align:right"><div class="val" id="ltime">00:00</div><div class="lbl">MISSION TIMER</div></div>
   </div>
 </div>
 
-<!-- DEPENDENCIES -->
+<!-- DEPENDENCIES: Includes GLTFLoader for custom 3D model support -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/EffectComposer.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/RenderPass.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/ShaderPass.js"></script>
@@ -216,6 +210,27 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--dark);user-sel
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/UnrealBloomPass.js"></script>
 
 <script>
+/* ======================================================================
+   CUSTOM GLB/GLTF LOADER ENABLED FOR OPTIMUS PRIME
+====================================================================== */
+const USE_CUSTOM_GLTF = true;
+
+// ตั้งค่าพื้นฐานสำหรับใช้งานบน GitHub (ดึงไฟล์จาก Folder เดียวกัน)
+let CUSTOM_GLTF_URL = "./scene.gltf"; 
+const manager = new THREE.LoadingManager();
+
+// เช็คว่ากำลังรันอยู่ในระบบ Preview ของ AI หรือไม่ 
+// (ถ้าใช่ ให้ดึงไฟล์ชั่วคราวที่อัปโหลดไว้ เพื่อให้พรีวิวทำงานได้)
+if (window.location.protocol === 'blob:') {
+    CUSTOM_GLTF_URL = "uploaded:optimus_prime_rotf_dotm_animation.zip/scene.gltf";
+    manager.setURLModifier((url) => {
+        if (url.includes('scene.bin')) return "uploaded:optimus_prime_rotf_dotm_animation.zip/scene.bin";
+        if (url.includes('RB_Optimus_MATINST_baseColor.jpeg')) return "uploaded:optimus_prime_rotf_dotm_animation.zip/textures/RB_Optimus_MATINST_baseColor.jpeg";
+        if (url.includes('RB_OptimusHead_MATINST_baseColor.jpeg')) return "uploaded:optimus_prime_rotf_dotm_animation.zip/textures/RB_OptimusHead_MATINST_baseColor.jpeg";
+        return url;
+    });
+}
+
 /* ── AUDIO ENGINE ── */
 const Snd = {
   ctx: null,
@@ -246,25 +261,25 @@ const Snd = {
 };
 document.addEventListener('click', () => Snd.init(), {once:true});
 
-/* ── DATA (Gundam Themed) ── */
+/* ── DATA ── */
 const STAGES = [
-  { id: 1, name: 'INNER FRAME', sub: 'Structural Foundation', action: 'DEPLOY FRAME', content: `<b>Initiating SanFun Protocol</b><br><br>The G-Type chassis requires a commitment to core principles before materialization.<br><br>1. Innovate relentlessly.<br>2. Support the grid.<br>3. Exceed limitations.<br><br>Confirm identity to initialize the endoskeleton.` },
-  { id: 2, name: 'CHEST BLOCK', sub: 'Energy Matrix', action: 'MOUNT REACTOR', content: `<b>Energy Matrix Requirements</b><br><br>The Mobile Suit requires standard power verification. You must authorize the internal sequence.<br><br>• Security protocols synced.<br>• 2FA Biometrics confirmed.<br><br>Authorize integration.` },
-  { id: 3, name: 'THRUSTER LEGS', sub: 'Mobility Array', action: 'ATTACH LEGS', content: `<b>Bipedal Locomotion Sync</b><br><br>The sheer weight of the armor requires heavy kinetic dampeners.<br><br>• Calibrating gyro-stabilizers.<br>• Syncing workspace coordinates.<br><br>Engage hydraulic locks to attach mobility array.` },
-  { id: 4, name: 'MANIPULATORS', sub: 'Heavy Arms', action: 'MOUNT ARMS', content: `<b>Tactical Manipulators</b><br><br>Equipping dual heavy-lift manipulator arms. These are required for high-level IDE operations and code deployment.<br><br>• Compiling toolchains.<br>• Loading Docker containers.<br><br>Lock servos in place.` },
-  { id: 5, name: 'MAIN SENSORS', sub: 'Optics & Comms', action: 'CONNECT HEAD', content: `<b>Optics Array Activation</b><br><br>To see the battlefield, the suit requires a high-fidelity sensor dome.<br><br>• Establishing Mentor comms-link.<br>• Mapping organizational grid.<br><br>Connect the cranial optics unit.` },
-  { id: 6, name: 'V-FIN ANTENNA', sub: 'CPU & Targeting', action: 'ATTACH V-FIN', content: `<b>Cognitive Processor</b><br><br>The iconic V-Fin houses the primary targeting array and security clearances.<br><br>• Firewalls active.<br>• Zero-trust architecture verified.<br><br>Insert the neural processor.` },
-  { id: 7, name: 'ZERO SYSTEM', sub: 'Full Awakening', action: 'AWAKEN G-TYPE', content: `<b>Total System Override</b><br><br>All physical systems are locked. Hardware is primed.<br><br>By initiating the awakening, you will assume direct manual control of the Mobile Suit.<br><br>Prepare for full sensory integration.` }
+  { id: 1, name: 'LOWER SERVOS', sub: 'Structural Foundation', action: 'DEPLOY LEGS', content: `<b>Initiating SanFun Protocol</b><br><br>Commitment to core principles is required before materialization.<br><br>1. Innovate relentlessly.<br>2. Support the grid.<br>3. Exceed limitations.<br><br>Confirm identity to initialize the lower structure.` },
+  { id: 2, name: 'PELVIS & CORE', sub: 'Energy Matrix', action: 'MOUNT REACTOR', content: `<b>Energy Matrix Requirements</b><br><br>The Leader Class requires standard power verification. You must authorize the internal sequence.<br><br>• Security protocols synced.<br>• 2FA Biometrics confirmed.<br><br>Authorize integration.` },
+  { id: 3, name: 'LOWER CHEST', sub: 'Mobility Array', action: 'ATTACH ARMOR', content: `<b>Kinetic Dampeners</b><br><br>The sheer weight of the armor requires heavy kinetic dampeners.<br><br>• Calibrating gyro-stabilizers.<br>• Syncing workspace coordinates.<br><br>Engage hydraulic locks to attach armor array.` },
+  { id: 4, name: 'UPPER CHEST', sub: 'Engine Block', action: 'SEAL CHEST', content: `<b>Engine Block Synchronization</b><br><br>Locking the main chest cavity. This protects the Matrix of Leadership.<br><br>• Compiling toolchains.<br>• Loading Docker containers.<br><br>Lock servos in place.` },
+  { id: 5, name: 'MANIPULATORS', sub: 'Heavy Arms', action: 'MOUNT ARMS', content: `<b>Tactical Manipulators</b><br><br>Equipping dual heavy-lift manipulator arms. These are required for high-level IDE operations.<br><br>• Establishing Mentor comms-link.<br>• Mapping organizational grid.<br><br>Connect the arms.` },
+  { id: 6, name: 'SHOULDER PADS', sub: 'Weapon Systems', action: 'ATTACH PAULDRONS', content: `<b>Weapon Systems</b><br><br>Heavy shoulder pauldrons required for defensive capabilities.<br><br>• Firewalls active.<br>• Zero-trust architecture verified.<br><br>Insert the defensive processor.` },
+  { id: 7, name: 'THE MATRIX', sub: 'Full Awakening', action: 'AWAKEN PRIME', content: `<b>Total System Override</b><br><br>All physical systems are locked. Hardware is primed.<br><br>By initiating the awakening, you will assume direct manual control of Optimus Prime.<br><br>Prepare for full sensory integration.` }
 ];
 
-let currentStage = parseInt(localStorage.getItem('sf_gundam_stage')) || 1;
+let currentStage = parseInt(localStorage.getItem('sf_optimus_stage')) || 1;
 let isFullyAssembled = false;
 let activeTaskId = null;
 const keys = { w:false, a:false, s:false, d:false, shift:false };
 let mouseX = 0, mouseY = 0;
 
-function saveProgress(s){ localStorage.setItem('sf_gundam_stage', s); }
-window.resetProgress = () => { localStorage.removeItem('sf_gundam_stage'); location.reload(); }
+function saveProgress(s){ localStorage.setItem('sf_optimus_stage', s); }
+window.resetProgress = () => { localStorage.removeItem('sf_optimus_stage'); location.reload(); }
 
 /* ── UI GEN ── */
 function renderUI() {
@@ -296,7 +311,7 @@ window.openTask = (id) => {
 window.closeTask = () => { Snd.ui(); document.getElementById('task-modal').classList.remove('show'); activeTaskId=null; }
 window.completeTask = () => { if(!activeTaskId)return; const id=activeTaskId; closeTask(); setTimeout(()=>triggerInstall(id), 400); }
 
-/* ── 3D ENGINE & GUNDAM MATERIALS ── */
+/* ── 3D ENGINE ── */
 const canvas = document.getElementById('c');
 const renderer = new THREE.WebGLRenderer({canvas, antialias:true, alpha:false});
 renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
@@ -304,28 +319,28 @@ renderer.setSize(innerWidth, innerHeight);
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure = 1.1;
+renderer.toneMappingExposure = 1.0; 
 
 const scene = new THREE.Scene();
-scene.background = new THREE.Color(0x010204);
-scene.fog = new THREE.FogExp2(0x010204, 0.025);
+scene.background = new THREE.Color(0x02050a);
+scene.fog = new THREE.FogExp2(0x02050a, 0.02);
 
 const cam = new THREE.PerspectiveCamera(45, innerWidth/innerHeight, 0.1, 300);
-cam.position.set(0, 4, 14);
+cam.position.set(0, 4, 18);
 
 // POST PROCESSING (Bloom)
 const renderScene = new THREE.RenderPass(scene, cam);
-const bloomPass = new THREE.UnrealBloomPass(new THREE.Vector2(innerWidth, innerHeight), 1.6, 0.5, 0.85);
-bloomPass.threshold = 0.2;
-bloomPass.strength = 1.6; 
-bloomPass.radius = 0.6;
+const bloomPass = new THREE.UnrealBloomPass(new THREE.Vector2(innerWidth, innerHeight), 0.4, 0.6, 0.85); 
+bloomPass.threshold = 0.6; 
+bloomPass.strength = 0.4; 
+bloomPass.radius = 0.4;
 const composer = new THREE.EffectComposer(renderer);
 composer.addPass(renderScene);
 composer.addPass(bloomPass);
 
 // LIGHTS
 scene.add(new THREE.AmbientLight(0x0a1526, 2.5));
-const sun = new THREE.DirectionalLight(0xffffff, 2.8);
+const sun = new THREE.DirectionalLight(0xffffff, 1.5); 
 sun.position.set(8, 20, 10); sun.castShadow = true;
 sun.shadow.mapSize.set(2048, 2048);
 sun.shadow.camera.near = 1; sun.shadow.camera.far = 60;
@@ -333,187 +348,194 @@ sun.shadow.camera.left=-15; sun.shadow.camera.right=15; sun.shadow.camera.top=15
 sun.shadow.bias = -0.001;
 scene.add(sun);
 
-const cR = new THREE.PointLight(0x00ffff, 0, 22); cR.position.set(-7,5,-2); scene.add(cR);
-const rR = new THREE.PointLight(0xff0033, 0, 16); rR.position.set(6,4,-4); scene.add(rR);
+const cR = new THREE.PointLight(0x00ffff, 0, 25); cR.position.set(-7,5,-2); scene.add(cR);
+const rR = new THREE.PointLight(0xff0033, 0, 20); rR.position.set(6,4,-4); scene.add(rR);
 
-// CLASSIC GUNDAM MATERIALS
-const M = {
-  white: new THREE.MeshPhysicalMaterial({ color: 0xeeeeee, metalness: 0.3, roughness: 0.5, clearcoat: 0.8, clearcoatRoughness: 0.2 }),
-  blue:  new THREE.MeshPhysicalMaterial({ color: 0x0033aa, metalness: 0.5, roughness: 0.4, clearcoat: 0.8 }),
-  red:   new THREE.MeshPhysicalMaterial({ color: 0xcc0011, metalness: 0.5, roughness: 0.4, clearcoat: 0.8 }),
-  gold:  new THREE.MeshStandardMaterial({ color: 0xffcc00, metalness: 0.8, roughness: 0.2 }),
-  frame: new THREE.MeshStandardMaterial({ color: 0x333333, metalness: 0.9, roughness: 0.5 }),
-  glow:  new THREE.MeshBasicMaterial({ color: 0x00ff66 })
-};
-
-// Colors to shift to during TRANS-AM (Hold Shift)
-const TransAm = {
-  white: new THREE.Color(0xffbbbb),
-  frame: new THREE.Color(0xaa0000),
-  emissive: new THREE.Color(0x660000)
-};
-const BaseCol = {
-  white: new THREE.Color(0xeeeeee),
-  frame: new THREE.Color(0x333333),
-  emissive: new THREE.Color(0x000000)
-};
-
-/* ── BUILD GUNDAM GEOMETRY ── */
-function B(w,h,d,m,x=0,y=0,z=0,rx=0,ry=0,rz=0){const o=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),m);o.position.set(x,y,z);o.rotation.set(rx,ry,rz);o.castShadow=true;o.receiveShadow=true;return o}
-function C(rt,rb,h,s,m,x=0,y=0,z=0,rx=0){const o=new THREE.Mesh(new THREE.CylinderGeometry(rt,rb,h,s),m);o.position.set(x,y,z);o.rotation.x=rx;o.castShadow=true;o.receiveShadow=true;return o}
-
+/* ── AUTO-ASSEMBLY GLTF LOADER ── */
 const robot = new THREE.Group(); scene.add(robot);
-const torsoG = new THREE.Group(); torsoG.position.y = 3.5; robot.add(torsoG);
-const headG = new THREE.Group(); headG.position.y = 1.4; 
-const armR = new THREE.Group(); armR.position.set(1.4, 0.4, 0); 
-const armL = new THREE.Group(); armL.position.set(-1.4, 0.4, 0); 
-const legR = new THREE.Group(); legR.position.set(0.6, -1.5, 0); 
-const legL = new THREE.Group(); legL.position.set(-0.6, -1.5, 0); 
 
-const p1_Chassis=new THREE.Group(); const p2_Core=new THREE.Group(); const p3_Legs=new THREE.Group(); const p4_Arms=new THREE.Group(); const p5_Sensors=new THREE.Group(); const p6_CPU=new THREE.Group(); const p7_Spark=new THREE.Group();
+let mixer;
+let gltfAnimations = [];
+let customModelChunks = [];
+let customModelRoot;
 
-torsoG.add(p1_Chassis); torsoG.add(p2_Core); robot.add(p3_Legs); torsoG.add(p4_Arms); headG.add(p5_Sensors); headG.add(p6_CPU); torsoG.add(p7_Spark);
-torsoG.add(headG); p3_Legs.add(legR); p3_Legs.add(legL); p4_Arms.add(armR); p4_Arms.add(armL);
+if(USE_CUSTOM_GLTF) {
+  const customLoader = new THREE.GLTFLoader(manager);
 
-// 1. INNER FRAME & WAIST (Chassis)
-p1_Chassis.add(B(0.6, 2.0, 0.5, M.frame, 0, 0, 0)); // Spine
-p1_Chassis.add(B(0.8, 0.5, 0.6, M.red, 0, -1.0, 0)); // Abdomen core
-p1_Chassis.add(B(1.0, 0.3, 0.8, M.white, 0, -1.4, 0)); // Waist center
-p1_Chassis.add(B(0.5, 0.6, 0.1, M.white, 0.3, -1.6, 0.45, -0.1)); // Front skirt R
-p1_Chassis.add(B(0.5, 0.6, 0.1, M.white, -0.3, -1.6, 0.45, -0.1)); // Front skirt L
-p1_Chassis.add(B(0.2, 0.7, 0.8, M.white, 0.6, -1.5, 0, 0, 0, 0.1)); // Side skirt R
-p1_Chassis.add(B(0.2, 0.7, 0.8, M.white, -0.6, -1.5, 0, 0, 0, -0.1)); // Side skirt L
-p1_Chassis.add(B(1.0, 0.7, 0.1, M.white, 0, -1.6, -0.4, 0.1)); // Back skirt
-p1_Chassis.add(B(0.25, 0.25, 0.2, M.gold, 0, -1.4, 0.42)); // Waist V block
+  customLoader.load(CUSTOM_GLTF_URL, function(gltf) {
+    customModelRoot = gltf.scene;
+    
+    // Auto-Scale Optimus to fit the hangar perfectly
+    const box = new THREE.Box3().setFromObject(customModelRoot);
+    const size = box.getSize(new THREE.Vector3()).length();
+    const scaleFactor = 10 / size; // Scale to ~10 units
+    customModelRoot.scale.setScalar(scaleFactor);
+    
+    // Adjust Y position so feet touch the floor
+    box.setFromObject(customModelRoot);
+    customModelRoot.position.y += (-box.min.y - 1.4); 
 
-// 2. CHEST BLOCK (Core)
-p2_Core.add(B(1.6, 0.9, 0.8, M.blue, 0, 0.4, 0)); // Main chest
-p2_Core.add(B(0.5, 0.25, 0.1, M.gold, 0.45, 0.5, 0.42)); // Vent R
-p2_Core.add(B(0.5, 0.25, 0.1, M.gold, -0.45, 0.5, 0.42)); // Vent L
-p2_Core.add(B(0.4, 0.5, 0.2, M.red, 0, 0.1, 0.4)); // Cockpit hatch
-p2_Core.add(B(0.6, 0.2, 0.6, M.gold, 0, 0.9, 0)); // Collar
-p2_Core.add(B(0.8, 1.2, 0.5, M.white, 0, 0.4, -0.5)); // Backpack
-p2_Core.add(C(0.08, 0.08, 0.8, 16, M.white, 0.3, 0.8, -0.6, Math.PI/6)); // Saber handle R
-p2_Core.add(C(0.08, 0.08, 0.8, 16, M.white, -0.3, 0.8, -0.6, Math.PI/6)); // Saber handle L
+    // Enable Animations if any exist
+    if(gltf.animations && gltf.animations.length > 0) {
+      mixer = new THREE.AnimationMixer(customModelRoot);
+      gltfAnimations = gltf.animations;
+    }
 
-// 3. THRUSTER LEGS
-function mkLeg(g, flip){
-  const f = flip ? -1 : 1;
-  g.add(C(0.25, 0.25, 0.6, 16, M.frame, 0, 0, 0, Math.PI/2)); // Hip joint
-  g.add(B(0.6, 1.2, 0.6, M.white, 0, -0.6, 0)); // Thigh
-  g.add(B(0.4, 0.4, 0.5, M.frame, 0, -1.4, 0.1)); // Knee joint
-  g.add(B(0.7, 1.4, 0.8, M.white, 0, -2.2, 0)); // Calf
-  g.add(B(0.5, 0.3, 0.5, M.white, 0, -2.9, 0.4, 0.2)); // Ankle guard
-  g.add(B(0.6, 0.4, 1.4, M.red, 0, -3.1, 0.2)); // Foot base
+    let meshes = [];
+    customModelRoot.traverse((node) => {
+      if (node.isMesh) {
+        node.castShadow = true;
+        node.receiveShadow = true;
+        // Boost material realism
+        if(node.material) {
+           node.material.metalness = 0.8;
+           node.material.roughness = 0.3;
+        }
+        
+        // Calculate the height (Y) of each mesh to sort them bottom-to-top
+        node.geometry.computeBoundingBox();
+        let center = new THREE.Vector3();
+        node.geometry.boundingBox.getCenter(center);
+        node.localToWorld(center);
+        meshes.push({mesh: node, y: center.y});
+        node.visible = false; // Hide all meshes initially for assembly
+      }
+    });
+
+    // Sort meshes by Height (Y axis) ascending
+    meshes.sort((a,b) => a.y - b.y);
+
+    // Group sorted meshes into 7 exact stages automatically!
+    const numStages = 7;
+    const chunkSize = Math.ceil(meshes.length / numStages);
+    for(let i=0; i<numStages; i++) {
+      customModelChunks.push(meshes.slice(i*chunkSize, (i+1)*chunkSize).map(m => m.mesh));
+    }
+
+    // Reveal already completed stages instantly (loaded from local storage)
+    for(let i=1; i<currentStage; i++) {
+       if(customModelChunks[i-1]) {
+         customModelChunks[i-1].forEach(m => m.visible = true);
+       }
+    }
+
+    robot.add(customModelRoot);
+    
+    // เมื่อโหลดเสร็จแล้ว ให้ซ่อน Loading screen
+    const ldr = document.getElementById('loader');
+    if (ldr) {
+        ldr.style.opacity = 0;
+        setTimeout(() => ldr.style.display = 'none', 800);
+    }
+    
+  }, undefined, function (error) {
+    console.error("GLTF Load Error:", error);
+    const lmEl = document.getElementById('lm');
+    if (lmEl) {
+        lmEl.textContent = "ERROR LOADING GLTF ASSETS.";
+        lmEl.style.color = "red";
+    }
+  });
 }
-mkLeg(legR, false); mkLeg(legL, true);
 
-// 4. MANIPULATORS (Arms)
-function mkArm(g, flip){
-  const f = flip ? -1 : 1;
-  g.add(C(0.2, 0.2, 0.8, 16, M.frame, 0, 0, 0, Math.PI/2)); // Shoulder inner
-  g.add(B(1.1, 0.9, 0.9, M.white, f*0.2, 0.3, 0)); // Pauldron base
-  g.add(B(0.8, 0.7, 1.0, M.red, f*0.2, 0.3, 0)); // Pauldron accent
-  g.add(B(0.4, 0.8, 0.4, M.white, 0, -0.6, 0)); // Bicep
-  g.add(C(0.2, 0.2, 0.45, 16, M.frame, 0, -1.1, 0, Math.PI/2)); // Elbow
-  g.add(B(0.5, 1.1, 0.5, M.white, 0, -1.8, 0)); // Forearm
-  g.add(B(0.35, 0.35, 0.35, M.frame, 0, -2.5, 0)); // Hand
+/* ── IMMERSIVE HANGAR BAY ── */
+// Heavy Metallic Floor
+const floorM = new THREE.MeshStandardMaterial({color:0x111520, metalness:0.8, roughness:0.2});
+const floor = new THREE.Mesh(new THREE.PlaneGeometry(60,60), floorM);
+floor.rotation.x = -Math.PI/2; floor.receiveShadow = true; scene.add(floor);
+const grid = new THREE.GridHelper(60, 60, 0x00e5ff, 0x050a15);
+grid.material.opacity = 0.15; grid.material.transparent = true; grid.position.y = 0.01; scene.add(grid);
+
+// Launchpad Ring
+const padR = new THREE.Mesh(new THREE.RingGeometry(2.8, 3.0, 64), new THREE.MeshBasicMaterial({color:0x00e5ff, side:THREE.DoubleSide}));
+padR.rotation.x = -Math.PI/2; padR.position.y = 0.02; scene.add(padR);
+const padGlow = new THREE.Mesh(new THREE.CircleGeometry(2.8, 64), new THREE.MeshBasicMaterial({color:0x00e5ff, transparent:true, opacity:0.1, side:THREE.DoubleSide}));
+padGlow.rotation.x = -Math.PI/2; padGlow.position.y = 0.015; scene.add(padGlow);
+
+// Warning Stripes
+const stripeM = new THREE.MeshBasicMaterial({color:0xffaa00});
+for(let i=-6; i<=6; i++) {
+  const stripe = new THREE.Mesh(new THREE.PlaneGeometry(0.8, 0.15), stripeM);
+  stripe.rotation.x = -Math.PI/2; stripe.position.set(i*1.5, 0.02, 3.5); scene.add(stripe);
 }
-mkArm(armR, false); mkArm(armL, true);
 
-// 5. MAIN SENSORS (Head)
-p5_Sensors.add(C(0.15, 0.15, 0.3, 16, M.frame, 0, -0.1, 0)); // Neck
-p5_Sensors.add(B(0.6, 0.6, 0.6, M.white, 0, 0.3, 0)); // Helmet
-p5_Sensors.add(B(0.7, 0.3, 0.5, M.white, 0, 0.15, 0.1)); // Cheeks
-p5_Sensors.add(B(0.2, 0.2, 0.2, M.red, 0, 0.05, 0.35)); // Chin
-p5_Sensors.add(B(0.3, 0.2, 0.1, M.frame, 0, 0.25, 0.36)); // Eye plate mask
+// Background Walls & Scaffolding
+const wMat = new THREE.MeshStandardMaterial({color:0x080a10, roughness:0.9});
+const backWall = new THREE.Mesh(new THREE.PlaneGeometry(40, 25), wMat);
+backWall.position.set(0, 12.5, -12); scene.add(backWall);
 
-// 6. V-FIN (CPU)
-p6_CPU.add(B(0.12, 0.15, 0.1, M.red, 0, 0.45, 0.38)); // Center jewel
-p6_CPU.add(B(0.08, 0.6, 0.05, M.gold, -0.25, 0.6, 0.38, 0, 0, 0.6)); // V-Fin L
-p6_CPU.add(B(0.08, 0.6, 0.05, M.gold, 0.25, 0.6, 0.38, 0, 0, -0.6)); // V-Fin R
-p6_CPU.add(B(0.12, 0.1, 0.2, M.glow, 0, 0.65, 0.25)); // Top camera (Green)
+const frameMat = new THREE.MeshStandardMaterial({color:0x222222, metalness:0.7, roughness:0.5});
+// Vertical Pillars
+[-4, 4].forEach(x => {
+  const p = new THREE.Mesh(new THREE.BoxGeometry(0.6, 20, 0.6), frameMat);
+  p.position.set(x, 10, -5); scene.add(p);
+  const p2 = new THREE.Mesh(new THREE.BoxGeometry(0.4, 20, 0.4), frameMat);
+  p2.position.set(x*1.5, 10, -11.5); scene.add(p2);
+});
+// Horizontal Catwalks
+[4, 8, 12].forEach(y => {
+  const cw = new THREE.Mesh(new THREE.BoxGeometry(12, 0.2, 1.5), frameMat);
+  cw.position.set(0, y, -5.5); scene.add(cw);
+});
 
-// 7. ZERO SYSTEM SPARK (Awakening Eyes)
-const eyeGlow = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.08, 0.05), M.glow);
-eyeGlow.position.set(0, 0.25, 0.42);
-p7_Spark.add(eyeGlow); // Eyes ignite!
+// Overhead Volumetric Spotlight - ลดความเข้มของไฟลงเพื่อให้โมเดลสว่างพอดี
+const spotG = new THREE.ConeGeometry(3, 16, 32, 1, true);
+const spotM = new THREE.MeshBasicMaterial({color:0xffffff, transparent:true, opacity:0.02, blending:THREE.AdditiveBlending, side:THREE.DoubleSide, depthWrite:false});
+const spotlight = new THREE.Mesh(spotG, spotM);
+spotlight.position.set(0, 8, 0); scene.add(spotlight);
 
-/* ── ASSEMBLY PHYSICS (Parabolic Arc Lerping) ── */
-const pData = {
-  1: { g: p1_Chassis, r: [0, 12, -8], s: 1, done: false, act: true },
-  2: { g: p2_Core, r: [6, 8, -4], s: 1.5, done: false, act: false },
-  3: { g: p3_Legs, r: [-8, -2, -5], s: 1, done: false, act: false },
-  4: { g: p4_Arms, r: [8, 4, -5], s: 1, done: false, act: false },
-  5: { g: p5_Sensors, r: [-5, 10, -3], s: 1.5, done: false, act: false },
-  6: { g: p6_CPU, r: [5, 11, 0], s: 2, done: false, act: false },
-  7: { g: p7_Spark, r: [0, 4, 8], s: 1, done: false, act: false }
-};
-
-// Restore state
-for(let i=1; i<currentStage; i++) {
-  pData[i].done = true; pData[i].act = false;
-  pData[i].g.position.set(0,0,0); pData[i].g.scale.set(1,1,1);
-}
-if(currentStage <= 7) pData[currentStage].act = true;
-
+/* ── ASSEMBLY LOGIC ── */
 let isInstalling = false;
 let installT = 0;
 let installId = null;
 
 function triggerInstall(id) {
   isInstalling = true; installT = 0; installId = id;
-  const p = pData[id]; p.act = false;
   Snd.play(400, 'sine', 0.8, 0.1, true); 
 }
 
 function finishInstall() {
   isInstalling = false;
-  const p = pData[installId];
-  p.done = true; p.g.position.set(0,0,0); p.g.scale.set(1,1,1); p.g.rotation.set(0,0,0);
+  
+  if(USE_CUSTOM_GLTF) {
+     const chunkIndex = installId - 1;
+     if(customModelChunks[chunkIndex]) {
+         customModelChunks[chunkIndex].forEach(m => {
+             m.visible = true;
+         });
+         fireSparksGLTF(customModelChunks[chunkIndex]);
+     }
+  }
   
   Snd.heavySnap();
-  fireSparks(p.g);
 
   currentStage++; saveProgress(currentStage);
-  if(currentStage <= 7) pData[currentStage].act = true;
-  else setTimeout(activateSuit, 1200);
+  if(currentStage > 7) setTimeout(activateSuit, 1200);
   renderUI();
 }
 
 function activateSuit() {
   isFullyAssembled = true;
   Snd.surge();
-  document.getElementById('flash').style.opacity = '1';
-  setTimeout(() => {
-    const flash = document.getElementById('flash');
-    if(flash) flash.style.opacity = '0';
-  }, 800);
+  const flash = document.getElementById('flash');
+  if(flash) { flash.style.opacity = '1'; setTimeout(() => flash.style.opacity = '0', 800); }
   
   const g = document.getElementById('greeting'); 
-  if(g) {
-    g.classList.add('show');
-    setTimeout(() => g.classList.remove('show'), 6000);
-  }
+  if(g) { g.classList.add('show'); setTimeout(() => g.classList.remove('show'), 6000); }
   
-  const sDot = document.getElementById('sys-dot');
-  if(sDot) sDot.className = 'dot g';
-  const sTxt = document.getElementById('sys-txt');
-  if(sTxt) { sTxt.style.color = 'var(--green)'; sTxt.textContent = 'ONLINE'; }
-  const bMsg = document.getElementById('b-msg');
-  if(bMsg) bMsg.textContent = 'MANUAL CONTROL ENGAGED';
-  const pCtrl = document.getElementById('panel-controls');
-  if(pCtrl) pCtrl.classList.add('unlocked');
+  const sDot = document.getElementById('sys-dot'); if(sDot) sDot.className = 'dot g';
+  const sTxt = document.getElementById('sys-txt'); if(sTxt) { sTxt.style.color = 'var(--green)'; sTxt.textContent = 'ONLINE'; }
+  const bMsg = document.getElementById('b-msg'); if(bMsg) bMsg.textContent = 'MANUAL CONTROL ENGAGED';
+  const pCtrl = document.getElementById('panel-controls'); if(pCtrl) pCtrl.classList.add('unlocked');
   
-  setAnim('wave'); 
+  setAnim('idle'); 
 }
 if(currentStage > 7) { setTimeout(()=> {
   activateSuit(); 
-  const g = document.getElementById('greeting');
-  if(g) g.classList.remove('show');
+  const g = document.getElementById('greeting'); if(g) g.classList.remove('show');
 }, 1000); }
 
-/* ── PARTICLES (Sparks & Thrusters) ── */
+/* ── PARTICLES ── */
 const ptG = new THREE.BufferGeometry(), ptC=200;
 const ptP = new Float32Array(ptC*3), ptV = [];
 for(let i=0;i<ptC;i++){ptP[i*3]=0;ptP[i*3+1]=0;ptP[i*3+2]=0; ptV.push(new THREE.Vector3());}
@@ -522,31 +544,32 @@ const ptM = new THREE.PointsMaterial({color:0xffdd44, size:0.1, transparent:true
 const sparks = new THREE.Points(ptG, ptM); scene.add(sparks);
 
 let sLife = 0;
-function fireSparks(grp) {
-  const wp = new THREE.Vector3(); grp.getWorldPosition(wp);
-  sparks.position.copy(wp); ptM.opacity = 1; sLife = 1.0;
+function fireSparksGLTF(meshes) {
+  if(!meshes || meshes.length === 0) return;
+  // Calculate average center of the chunk for the explosion origin
+  let center = new THREE.Vector3();
+  let count = 0;
+  meshes.forEach(m => {
+      let p = new THREE.Vector3();
+      m.getWorldPosition(p);
+      center.add(p); count++;
+  });
+  center.divideScalar(count);
+  
+  sparks.position.copy(center); ptM.opacity = 1; sLife = 1.0;
   for(let i=0;i<ptC;i++){
     ptV[i].set((Math.random()-0.5)*15, Math.random()*15, (Math.random()-0.5)*15);
     ptG.attributes.position.setXYZ(i, 0,0,0);
   }
 }
 
-// Speed Lines
-const sdG = new THREE.BufferGeometry(), sdC = 300;
-const sdP = new Float32Array(sdC*3);
-for(let i=0;i<sdC;i++){ sdP[i*3]=(Math.random()-0.5)*40; sdP[i*3+1]=(Math.random()-0.5)*40; sdP[i*3+2]=(Math.random()-0.5)*40; }
-sdG.setAttribute('position', new THREE.BufferAttribute(sdP,3));
-const sdM = new THREE.PointsMaterial({color:0xff0066, size:0.2, transparent:true, opacity:0});
-const speedLines = new THREE.Points(sdG, sdM); scene.add(speedLines);
-
-/* ── INPUT ── */
+/* ── INPUT & CAMERA ── */
 window.addEventListener('keydown', e => { const k=e.key.toLowerCase(); if(keys.hasOwnProperty(k)) keys[k]=true; });
 window.addEventListener('keyup', e => { const k=e.key.toLowerCase(); if(keys.hasOwnProperty(k)) keys[k]=false; });
 window.addEventListener('mousemove', e => { mouseX = (e.clientX/innerWidth)*2-1; mouseY = -(e.clientY/innerHeight)*2+1; });
 
-/* ── CAMERA RIG ── */
 let cDrag=false, cRBtn=false, cPrev={x:0,y:0};
-let sph={t:0.5, p:1.2, r:16}, tsph={t:0.5, p:1.2, r:16};
+let sph={t:0.5, p:1.3, r:22}, tsph={t:0.5, p:1.3, r:22};
 let pan=new THREE.Vector3(), tpan=new THREE.Vector3();
 
 canvas.addEventListener('mousedown', e=>{cDrag=true; cRBtn=e.button===2; cPrev={x:e.clientX,y:e.clientY};});
@@ -558,27 +581,26 @@ window.addEventListener('mousemove', e=>{
   if(!cRBtn){ tsph.t -= dx*0.005; tsph.p = Math.max(0.1, Math.min(Math.PI*0.9, tsph.p+dy*0.005)); }
   else { tpan.x -= dx*0.01; tpan.y += dy*0.01; }
 });
-canvas.addEventListener('wheel', e=>{ tsph.r = Math.max(5, Math.min(30, tsph.r+e.deltaY*0.02)); },{passive:true});
+canvas.addEventListener('wheel', e=>{ tsph.r = Math.max(5, Math.min(40, tsph.r+e.deltaY*0.03)); },{passive:true});
 
-/* ── ANIMATION SYS ── */
-let curAnim='idle', aTimer=0, pAnim='idle';
-const AS={
-  idle:{b:0.06,s:1.5,sw:0.02,d:0}, march:{b:0.18,s:8.0,sw:0.1,d:0},
-  wave:{b:0.03,s:1.0,sw:0,d:2.5}, punch:{b:0.03,s:1.0,sw:0,d:1.2},
-  confirm:{b:0,s:0,sw:0,d:2.0}, approve:{b:0.08,s:2.5,sw:0.05,d:2.0},
-  alert:{b:0.08,s:6,sw:0.1,d:2.5}, spin:{b:0,s:0,sw:0,d:2.0}
-};
-const OS=new Set(['wave','punch','confirm','approve','alert','spin']);
+/* ── GLTF ANIMATION SYS ── */
+let curAnim='idle';
 
 window.setAnim = (n) => {
   if(!isFullyAssembled) return;
-  if(!AS[n]) return;
   document.querySelectorAll('.ab').forEach(b=>b.classList.remove('on'));
   const btn=document.getElementById('btn-'+n); if(btn)btn.classList.add('on');
-  if(OS.has(n)){pAnim=curAnim; aTimer=0;}
   curAnim=n; 
   const animLabel = document.getElementById('lanim');
   if (animLabel) animLabel.textContent = n.toUpperCase();
+  
+  if (USE_CUSTOM_GLTF && mixer && gltfAnimations.length > 0) {
+      mixer.stopAllAction();
+      // Attempt to find animation matching button string, otherwise default to first.
+      // Often sketchfab models only have 1 long animation (Take 001). 
+      let clip = gltfAnimations.find(a => a.name.toLowerCase().includes(n)) || gltfAnimations[0];
+      if(clip) mixer.clipAction(clip).play();
+  }
 }
 
 /* ── MAIN LOOP ── */
@@ -586,10 +608,7 @@ renderUI();
 let loadPct=0; const lbw=document.getElementById('lb'), lm=document.getElementById('lm');
 const lInt=setInterval(()=>{
   loadPct+=Math.random()*15; if(loadPct>100)loadPct=100; lbw.style.width=loadPct+'%';
-  if(loadPct>=100){ clearInterval(lInt); setTimeout(()=>{ 
-    const ldr = document.getElementById('loader');
-    if(ldr) { ldr.style.opacity=0; setTimeout(()=>ldr.style.display='none',800); }
-  },500); }
+  // เอาเงื่อนไขที่ซ่อน Loader ออก ปล่อยให้ GLTFLoader จัดการซ่อนเองเมื่อโหลดเสร็จ
 }, 80);
 
 const clk = new THREE.Clock();
@@ -608,67 +627,23 @@ function tick(){
     p.needsUpdate = true;
   }
 
-  // Assembly Flight
-  Object.keys(pData).forEach(id => {
-    const p = pData[id];
-    if(isInstalling && id == installId) {
+  // Update Animation Mixer for Optimus Prime
+  if(mixer) mixer.update(dt);
+
+  // Assembly Flight Status
+  if(isInstalling) {
       installT += dt * 1.5; 
       if(installT >= 1) finishInstall();
-      else {
-        const ease = 1 - Math.pow(1 - installT, 3); 
-        const arcY = Math.sin(installT * Math.PI) * 5; 
-        p.g.position.x = p.r[0] + (0 - p.r[0]) * ease;
-        p.g.position.y = p.r[1] + (0 - p.r[1]) * ease + arcY;
-        p.g.position.z = p.r[2] + (0 - p.r[2]) * ease;
-        p.g.scale.setScalar(p.s + (1 - p.s) * ease);
-        p.g.rotation.y = installT * Math.PI * 4; 
-      }
-    } else if (p.act) {
-      p.g.position.set(p.r[0], p.r[1] + Math.sin(t*3)*0.3, p.r[2]);
-      p.g.rotation.y += dt;
-      p.g.scale.lerp(new THREE.Vector3(p.s,p.s,p.s), 0.1);
-    } else if (!p.done) {
-      p.g.scale.set(0,0,0);
-    }
-  });
+  }
 
-  // Mobile Suit Logic
+  // Mobile Suit Walk Logic
   if(isFullyAssembled) {
     
-    // TRANS-AM (Hold Shift)
     let dx=0, dz=0;
     let speed = keys.shift ? dt * 18 : dt * 7;
     
     if(keys.w) dz -= speed; if(keys.s) dz += speed;
     if(keys.a) dx -= speed; if(keys.d) dx += speed;
-
-    if(keys.shift && (dx!==0 || dz!==0)) {
-      tsph.r = 18; 
-      sdM.opacity = 0.5;
-      const sp = sdG.attributes.position;
-      for(let i=0;i<sdC;i++){
-        let nz = sp.getZ(i) + dt*50; if(nz>20) nz=-20;
-        sp.setZ(i, nz);
-      }
-      sp.needsUpdate=true;
-      
-      const powUI = document.getElementById('lt-trans');
-      if(powUI) { powUI.textContent = 'ENGAGED'; powUI.className = 'sv r'; }
-      
-      // Armor shifts to pink/red
-      M.white.color.lerp(TransAm.white, 0.05);
-      M.frame.color.lerp(TransAm.frame, 0.05);
-      M.frame.emissive.lerp(TransAm.emissive, 0.05);
-      
-    } else {
-      sdM.opacity *= 0.9;
-      const powUI = document.getElementById('lt-trans');
-      if(powUI) { powUI.textContent = 'STANDBY'; powUI.className = 'sv c'; }
-      
-      M.white.color.lerp(BaseCol.white, 0.05);
-      M.frame.color.lerp(BaseCol.frame, 0.05);
-      M.frame.emissive.lerp(BaseCol.emissive, 0.05);
-    }
 
     if(dx!==0 || dz!==0) {
       robot.position.x += dx; robot.position.z += dz;
@@ -678,63 +653,10 @@ function tick(){
       while(diff < -Math.PI) diff += Math.PI*2; while(diff > Math.PI) diff -= Math.PI*2;
       robot.rotation.y += diff * 0.15;
 
-      torsoG.rotation.z = -diff * 0.2;
-      torsoG.rotation.x = 0.1; 
-
-      if(curAnim !== 'march' && !OS.has(curAnim)) setAnim('march');
-      AS.march.spd = keys.shift ? 12.0 : 8.0; 
+      if(curAnim !== 'walk' && curAnim !== 'run') setAnim(keys.shift ? 'run' : 'walk');
     } else {
-      torsoG.rotation.z *= 0.9;
-      torsoG.rotation.x *= 0.9;
-      if (curAnim === 'march') setAnim('idle');
+      if (curAnim === 'walk' || curAnim === 'run') setAnim('idle');
     }
-
-    // IK Animations
-    const s = AS[curAnim] || AS.idle;
-    if(OS.has(curAnim)){
-      aTimer += dt;
-      if(aTimer >= s.d){
-        curAnim = pAnim;
-        document.querySelectorAll('.ab').forEach(b=>b.classList.remove('on'));
-        const btn=document.getElementById('btn-'+pAnim); if(btn)btn.classList.add('on');
-        const animLabel = document.getElementById('lanim');
-        if (animLabel) animLabel.textContent = pAnim.toUpperCase();
-      }
-    }
-
-    robot.position.y = Math.sin(t * s.s) * s.b;
-    
-    // Mouse Tracking 
-    if(curAnim === 'idle' || curAnim === 'march') {
-      headG.rotation.y += (-mouseX*0.8 - headG.rotation.y) * 0.1;
-      headG.rotation.x += (-mouseY*0.5 - headG.rotation.x) * 0.1;
-      torsoG.rotation.y += (-mouseX*0.3 - torsoG.rotation.y) * 0.05;
-    } else {
-      headG.rotation.y *= 0.9; headG.rotation.x *= 0.9; torsoG.rotation.y *= 0.9;
-    }
-
-    // Walking limbs
-    if(curAnim === 'march') {
-      const sw = Math.sin(t * s.s) * 0.6;
-      legR.rotation.x = sw; legL.rotation.x = -sw;
-      armR.rotation.x = -sw*0.5; armL.rotation.x = sw*0.5;
-      legR.position.y = -1.5 + Math.max(0, -sw*0.3);
-      legL.position.y = -1.5 + Math.max(0, sw*0.3);
-    } else {
-      legR.rotation.x *= 0.8; legL.rotation.x *= 0.8;
-      legR.position.y = -1.5; legL.position.y = -1.5;
-      if(curAnim !== 'punch') { armR.rotation.x *= 0.9; armL.rotation.x *= 0.9; }
-    }
-
-    // Actions
-    if(curAnim === 'wave'){ const wt=aTimer/s.d; armR.rotation.z=-Math.PI*0.85*Math.sin(Math.PI*wt); armR.rotation.x=Math.sin(t*10)*0.2*Math.sin(Math.PI*wt); }
-    else if(curAnim !== 'punch' && curAnim !== 'approve'){ armR.rotation.z *= 0.9; }
-    
-    if(curAnim === 'punch'){ armR.rotation.x=-Math.PI*0.9*Math.sin(Math.PI*aTimer/s.d*2); armR.rotation.z=0.2; }
-    if(curAnim === 'approve'){ const rz=-Math.PI*0.7*Math.sin(Math.PI*aTimer/s.d); armR.rotation.z=rz; armL.rotation.z=-rz; }
-    else { armL.rotation.z *= 0.9; }
-    
-    if(curAnim === 'spin'){ robot.rotation.y += dt*Math.PI*4; }
   }
 
   // Camera Update
@@ -742,8 +664,8 @@ function tick(){
   sph.p += (tsph.p - sph.p) * 0.08;
   sph.r += (tsph.r - sph.r) * 0.05;
   pan.lerp(tpan, 0.08);
-  cam.position.set(sph.r*Math.sin(sph.p)*Math.sin(sph.t)+pan.x, sph.r*Math.cos(sph.p)+1.5+pan.y, sph.r*Math.sin(sph.p)*Math.cos(sph.t)+pan.z);
-  cam.lookAt(pan.x, 1.5+pan.y, pan.z);
+  cam.position.set(sph.r*Math.sin(sph.p)*Math.sin(sph.t)+pan.x, sph.r*Math.cos(sph.p)+2+pan.y, sph.r*Math.sin(sph.p)*Math.cos(sph.t)+pan.z);
+  cam.lookAt(pan.x, 2+pan.y, pan.z);
 
   // HUD
   const el = Math.floor(t);
