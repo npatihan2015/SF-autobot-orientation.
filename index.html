@@ -1,24 +1,935 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>SanFun Robotics Hangar</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<link rel="stylesheet" href="style.css">
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+<title>SanFun Group — Advanced Mobile Suit Assembly</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Orbitron:wght@500;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--theme:#00ffff;--theme-dim:rgba(0,255,255,0.15);--dark:#02050a;--panel:rgba(10,15,25,0.4);--text:#a0c0f0;--bright:#ffffff}
+html,body{width:100%;height:100%;overflow:hidden;background:var(--dark);user-select:none;font-family:'Inter',sans-serif;color:var(--text);touch-action:none;}
+#c{position:fixed;inset:0;width:100%;height:100%;display:block;cursor:crosshair}
+
+.vignette{position:fixed;inset:0;pointer-events:none;z-index:4;background:radial-gradient(circle at center,transparent 10%,rgba(0,2,5,0.9) 100%)}
+
+/* GLASSMORPHISM HUD STRUCTURE */
+.hud-top{position:fixed;top:0;left:0;right:0;z-index:20;display:flex;align-items:center;justify-content:space-between;padding:15px 35px;background:rgba(5,10,15,0.5);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-bottom:1px solid rgba(255,255,255,0.05);animation:fadeInDown 1s ease-out forwards;}
+.logo-block{display:flex;align-items:center;gap:18px}
+.logo-icon{width:42px;height:42px;border:1px solid var(--theme);display:flex;align-items:center;justify-content:center;border-radius:12px;box-shadow:0 0 20px var(--theme-dim); position:relative; transition:all 0.3s; background:rgba(0,0,0,0.5);}
+.logo-icon::after{content:'';position:absolute;inset:-4px;border:1px solid var(--theme-dim);border-radius:2px;animation:spin 10s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.logo-icon img{width:100%;height:100%;object-fit:contain;border-radius:10px;padding:4px;filter:drop-shadow(0 0 5px var(--theme))}
+.t1{font-family:'Orbitron',sans-serif;font-size:15px;font-weight:700;color:var(--bright);letter-spacing:4px; text-shadow:0 0 10px rgba(255,255,255,0.2)}
+.t2{font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--theme);letter-spacing:3px;opacity:.8; margin-top:2px;}
+
+/* PANELS & ANIMATIONS */
+@keyframes slideInL { from { transform:translateX(-60px); opacity:0; } to { transform:translateX(0); opacity:1; } }
+@keyframes slideInR { from { transform:translateX(60px); opacity:0; } to { transform:translateX(0); opacity:1; } }
+@keyframes fadeInDown { from { transform:translateY(-30px); opacity:0; } to { transform:translateY(0); opacity:1; } }
+@keyframes fadeInUp { from { transform:translateY(30px); opacity:0; } to { transform:translateY(0); opacity:1; } }
+
+.panel{position:fixed;top:90px;width:340px;z-index:20;display:flex;flex-direction:column;gap:15px;}
+.panel-l{left:35px;bottom:80px;overflow-y:auto;scrollbar-width:none; animation:slideInL 0.8s cubic-bezier(0.16,1,0.3,1) forwards;}
+.panel-l::-webkit-scrollbar{display:none}
+.panel-r{right:35px;transition:all 0.8s cubic-bezier(0.16, 1, 0.3, 1);opacity:0;pointer-events:none;transform:translateX(40px)}
+.panel-r.unlocked{opacity:1;pointer-events:auto;animation:slideInR 0.8s cubic-bezier(0.16,1,0.3,1) forwards;}
+
+/* PREMIUM GLASS CARDS */
+.card{background:var(--panel);border:1px solid rgba(255,255,255,0.08);padding:22px;position:relative;backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);box-shadow:0 15px 35px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.1);border-radius:16px;}
+.ct{font-family:'Orbitron',sans-serif;font-size:10px;font-weight:700;color:var(--theme);letter-spacing:3px;margin-bottom:18px;display:flex;align-items:center;gap:12px;text-transform:uppercase;}
+.ct::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,rgba(255,255,255,0.1),transparent)}
+
+/* SEQUENCE ITEMS */
+#stages-container{display:flex;flex-direction:column;gap:10px;}
+.si{display:flex;flex-direction:column;padding:14px 16px;border:1px solid rgba(255,255,255,0.04);transition:all .4s cubic-bezier(0.16, 1, 0.3, 1);position:relative;background:rgba(0,0,0,0.2);border-radius:10px;overflow:hidden}
+.si.done{border-color:var(--theme-dim);background:rgba(0,255,255,0.03)}
+.si.act{border-color:rgba(255,204,0,.4);background:rgba(255,204,0,.08);transform:translateX(6px);box-shadow:-6px 0 20px rgba(255,204,0,0.1)}
+.si.lck{opacity:.4}
+.si-header{display:flex;align-items:center;gap:14px;}
+.sn{font-family:'Orbitron',sans-serif;font-size:15px;font-weight:900;width:24px;text-align:center;}
+.si.done .sn{color:var(--theme)}.si.act .sn{color:#ffcc00; text-shadow:0 0 10px #ffcc00}.si.lck .sn{color:#4a5a70}
+.si-info .sname{font-size:14px;font-weight:600;color:var(--bright);letter-spacing:1px;font-family:'Orbitron',sans-serif;}.si-info .ssub{font-size:11px;color:var(--text);opacity:.7;margin-top:3px}
+.install-btn{margin-top:14px;padding:12px;background:#ffcc00;color:#000;border:none;border-radius:8px;font-family:'Orbitron',sans-serif;font-size:11px;font-weight:900;letter-spacing:2px;cursor:pointer;transition:all 0.3s;display:none;text-align:center;box-shadow:0 5px 15px rgba(255,204,0,0.3);}
+.si.act .install-btn{display:block}
+.install-btn:hover{background:#ffdd33;transform:translateY(-2px);box-shadow:0 8px 20px rgba(255,204,0,0.5);}
+
+/* PROGRESS BAR */
+.pb-wrap{margin-top:20px}.pb-lbl{display:flex;justify-content:space-between;margin-bottom:10px}
+.pb-lbl span{font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:1px}
+.pbl{color:var(--theme);opacity:.8}.pbv{color:var(--bright);font-weight:700;}
+.pb{height:6px;background:rgba(255,255,255,.05);border-radius:3px;overflow:hidden;position:relative}
+.pbf{height:100%;width:0%;background:var(--theme);box-shadow:0 0 10px var(--theme);transition:width 0.8s cubic-bezier(0.16, 1, 0.3, 1)}
+
+/* RIGHT PANEL SPECS */
+.sr{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid rgba(255,255,255,.03)}
+.sk{font-size:11px;color:var(--text);opacity:.7;letter-spacing:1px}
+.sv{font-family:'Orbitron',sans-serif;font-size:11px;font-weight:700;letter-spacing:1px}
+.sv.c{color:var(--theme);}.sv.a{color:#ffcc00;}.sv.g{color:#00ff66;}.sv.r{color:#ff1a33;}
+
+/* ACTION GRID */
+.abg{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:5px}
+.ab{padding:12px 5px;font-family:'Orbitron',sans-serif;font-size:10px;font-weight:700;letter-spacing:1.5px;text-align:center;border:1px solid rgba(255,255,255,0.08);border-radius:8px;background:rgba(255,255,255,.02);color:var(--text);cursor:pointer;transition:all .2s;}
+.ab:hover{border-color:var(--theme);color:var(--bright);background:var(--theme-dim);transform:translateY(-2px)}
+.ab.on{border-color:var(--theme);color:#000;background:var(--theme);box-shadow:0 5px 15px var(--theme-dim)}
+
+/* HUD BOT */
+.hud-bot{position:fixed;bottom:0;left:0;right:0;z-index:20;padding:15px 35px;display:flex;align-items:center;justify-content:space-between;background:rgba(5,10,15,0.5);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-top:1px solid rgba(255,255,255,0.05);animation:fadeInUp 1s ease-out forwards;}
+.hb-left, .hb-right{display:flex;align-items:center;gap:35px}
+.hs{display:flex;flex-direction:column}
+.hs .val{font-family:'Orbitron',sans-serif;font-size:22px;font-weight:900;color:var(--bright);line-height:1;}
+.hs .lbl{font-size:9px;color:var(--theme);opacity:.6;letter-spacing:2px;margin-top:6px;text-transform:uppercase;}
+.status-pill{display:flex;align-items:center;gap:10px;font-family:'Orbitron',sans-serif;font-size:11px;font-weight:700;letter-spacing:2px;padding:8px 16px;border:1px solid rgba(255,255,255,0.1);border-radius:20px;background:rgba(255,255,255,.03);}
+.dot{width:8px;height:8px;border-radius:50%;}
+.dot.a{background:#ffcc00;box-shadow:0 0 10px #ffcc00;animation:blink 1s infinite}
+.dot.g{background:#00ff66;box-shadow:0 0 10px #00ff66}
+@keyframes blink{50%{opacity:0.3}}
+
+/* MODALS (Task & Dept) */
+.modal-overlay {position:fixed;inset:0;background:rgba(2,5,10,0.8);z-index:50;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity 0.4s;backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);}
+.modal-overlay.show {opacity:1;pointer-events:auto;}
+#dept-modal { z-index: 110; }
+.tm-box {width:500px;max-width:90%;background:var(--panel);border:1px solid rgba(255,255,255,0.1);box-shadow:0 30px 60px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.2);padding:45px;border-radius:20px;transform:scale(0.95) translateY(20px);transition:all 0.4s cubic-bezier(0.16, 1, 0.3, 1);}
+.modal-overlay.show .tm-box {transform:scale(1) translateY(0);}
+.tm-header {display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid rgba(255,255,255,0.05);padding-bottom:20px;margin-bottom:30px;}
+.tm-title {font-family:'Orbitron',sans-serif;color:var(--bright);font-size:20px;font-weight:900;letter-spacing:3px;}
+.tm-close {color:var(--text);cursor:pointer;font-family:monospace;font-size:28px;transition:color 0.2s;}
+.tm-close:hover {color:#ff1a33;}
+.tm-content {font-size:14px;line-height:1.7;color:var(--text);margin-bottom:35px;}
+.tm-content b{color:var(--bright);font-family:'Orbitron',sans-serif;letter-spacing:1px;font-size:16px}
+.tm-btn {background:var(--theme);color:#000;border:none;padding:18px 20px;border-radius:10px;font-family:'Orbitron',sans-serif;font-size:13px;font-weight:900;letter-spacing:3px;cursor:pointer;width:100%;transition:all 0.3s;box-shadow:0 10px 25px var(--theme-dim);}
+.tm-btn:hover {background:var(--bright);transform:translateY(-3px);box-shadow:0 15px 35px rgba(255,255,255,0.4);}
+
+/* DEPT MODAL SPECIFICS */
+.name-input { width: 100%; padding: 18px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.2); border-radius:10px; color: var(--bright); font-family: 'Orbitron', sans-serif; font-size: 16px; margin-bottom: 25px; outline: none; text-align: center; letter-spacing: 2px; transition:all 0.3s;}
+.name-input:focus { border-color:var(--theme); box-shadow: 0 0 20px var(--theme-dim); background: rgba(0,0,0,0.5);}
+.dept-btn { margin-bottom:15px; padding: 20px; font-size: 13px; border-width: 1px; border-style:solid; display:flex; justify-content:space-between; align-items:center; background:rgba(255,255,255,0.03)!important; color:var(--bright)!important; box-shadow:none;}
+.dept-btn:hover { background:rgba(255,255,255,0.1)!important; transform: scale(1.02); }
+.d-sys { border-color:#00aaff; } .d-sys:hover{ box-shadow:0 0 20px rgba(0,170,255,0.3); }
+.d-mkt { border-color:#ff8800; } .d-mkt:hover{ box-shadow:0 0 20px rgba(255,136,0,0.3); }
+
+/* GREETING MODAL & FLASH */
+#greeting {position:fixed;top:45%;left:50%;transform:translate(-50%,-50%) scale(0.8);text-align:center;opacity:0;pointer-events:none;transition:all 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);z-index:100;}
+#greeting.show {opacity:1;transform:translate(-50%,-50%) scale(1);}
+#greeting .title {font-family:'Orbitron',sans-serif;font-size:55px;font-weight:900;color:var(--bright);margin-bottom:15px;letter-spacing:8px;text-shadow:0 0 40px var(--theme)}
+#greeting .sub {font-family:'Inter',sans-serif;font-size:16px;letter-spacing:4px;color:var(--theme);text-transform:uppercase; font-weight:600;}
+#flash{position:fixed;inset:0;background:var(--bright);z-index:90;opacity:0;pointer-events:none;transition:opacity 0.8s ease-out;mix-blend-mode:overlay}
+
+/* VIRTUAL JOYSTICK (MOBILE) */
+#joystick-zone { position: fixed; bottom: 100px; left: 35px; width: 130px; height: 130px; background: rgba(255,255,255, 0.03); border: 1px solid rgba(255,255,255,0.1); border-radius: 50%; z-index: 40; display: none; touch-action: none; backdrop-filter: blur(10px);}
+#joystick-knob { position: absolute; top: 50%; left: 50%; width: 50px; height: 50px; background: var(--bright); border-radius: 50%; transform: translate(-50%, -50%); box-shadow: 0 5px 15px rgba(0,0,0,0.5); pointer-events: none; transition: transform 0.1s;}
+@media (hover: none) and (pointer: coarse) {
+    #joystick-zone { display: block; }
+    .ch { display: none; }
+    .panel-l, .panel-r { display: none; }
+}
+
+/* LOADER */
+#loader{position:fixed;inset:0;z-index:100;background:#050a0f;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:25px;transition:opacity 0.8s ease-in-out}
+.ll{font-family:'Orbitron',sans-serif;font-size:36px;font-weight:900;color:var(--bright);letter-spacing:10px;}
+.ll span{color:var(--theme)}
+.lbw{width:280px;height:4px;background:rgba(255,255,255,.05);border-radius:2px;position:relative;overflow:hidden}
+.lb{height:100%;width:0;background:var(--theme);box-shadow:0 0 15px var(--theme);transition:width .1s linear}
+.lm{font-size:11px;color:var(--text);letter-spacing:3px;text-transform:uppercase;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:.5}50%{opacity:1}}
+</style>
 </head>
 <body>
-
-<div id="loadingScreen">
-  <h1>Initializing Robotics System...</h1>
+<div id="loader">
+  <div class="ll">SANFUN<span>OS</span></div>
+  <div class="lbw"><div class="lb" id="lb"></div></div>
+  <div class="lm" id="lm">INITIALIZING AAA ENVIRONMENT...</div>
 </div>
 
-<div id="overlay">
-  <h1>Welcome to SanFun Group</h1>
-  <p>A Million Lives • A Million Dreams</p>
-  <button id="enterBtn">Activate System</button>
+<div id="flash"></div>
+
+<!-- VIRTUAL JOYSTICK -->
+<div id="joystick-zone"><div id="joystick-knob"></div></div>
+
+<!-- DEPT SELECTION MODAL -->
+<div id="dept-modal" class="modal-overlay">
+  <div class="tm-box" style="text-align:center;">
+    <div class="tm-title" style="margin-bottom:15px; font-size:24px;">PILOT REGISTRATION</div>
+    <div class="tm-content" style="margin-bottom:30px; font-size:14px;">Enter your designation and select your division to calibrate armor colors and HUD signatures.</div>
+    <input type="text" id="pilot-name" class="name-input" placeholder="ENTER PILOT NAME" autocomplete="off" maxlength="15"/>
+    <button class="tm-btn dept-btn d-sys" onclick="selectDept('system')">
+        <span>SYSTEM</span> <span style="color:#00aaff">BLUE / SILVER</span>
+    </button>
+    <button class="tm-btn dept-btn d-mkt" onclick="selectDept('marketing')">
+        <span>MARKETING</span> <span style="color:#ff8800">ORANGE / WHITE</span>
+    </button>
+  </div>
 </div>
 
-<script type="module" src="main.js"></script>
+<!-- TASK MODAL -->
+<div id="task-modal" class="modal-overlay">
+  <div class="tm-box">
+    <div class="tm-header">
+      <div class="tm-title" id="tm-title">MODULE</div>
+      <div class="tm-close" onclick="closeTask()">✕</div>
+    </div>
+    <div class="tm-content" id="tm-content">...</div>
+    <button class="tm-btn" id="tm-btn" onclick="completeTask()">INITIATE SEQUENCE</button>
+  </div>
+</div>
 
+<div id="greeting">
+   <div class="title" id="greet-title">SYSTEM AWAKENED</div>
+   <div class="sub">Autobots, Roll Out! Welcome to SanFun Group.</div>
+</div>
+
+<canvas id="c"></canvas>
+<div class="vignette"></div>
+
+<header class="hud-top">
+  <div class="logo-block">
+    <div class="logo-icon">
+      <img src="https://lh3.googleusercontent.com/d/1wEroCi-q4xWI7zUUdrClmDLpjJvZZpUm" alt="SanFun Logo"/>
+    </div>
+    <div><div class="t1">SANFUN ONBOARDING PROGRAM</div><div class="t2">HANGAR BAY 04 — ADVANCED MECH ASSEMBLY</div></div>
+  </div>
+  <button onclick="resetProgress()" style="background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); border-radius:6px; color:var(--text); font-family:'Orbitron',sans-serif; font-size:10px; font-weight:700; letter-spacing:2px; padding:10px 18px; cursor:pointer; transition:all 0.3s">SYSTEM RESET</button>
+</header>
+
+<div class="panel panel-l">
+  <div class="card">
+    <div class="ct">ONBOARDING PROTOCOL</div>
+    <div id="stages-container"></div>
+    <div class="pb-wrap">
+      <div class="pb-lbl"><span class="pbl">OVERALL INTEGRATION</span><span class="pbv" id="pb-val">0%</span></div>
+      <div class="pb"><div class="pbf" id="pb-fill"></div></div>
+    </div>
+  </div>
+</div>
+
+<div class="panel panel-r" id="panel-controls">
+  <div class="card">
+    <div class="ct">NEURAL OVERRIDE</div>
+    <div class="abg">
+      <button class="ab on"  id="btn-idle"    onclick="setAnim('idle')">STANDBY</button>
+      <button class="ab"     id="btn-march"   onclick="setAnim('march')">SORTIE</button>
+      <button class="ab"     id="btn-wave"    onclick="setAnim('wave')">SALUTE</button>
+      <button class="ab"     id="btn-punch"   onclick="setAnim('punch')">STRIKE</button>
+      <button class="ab"     id="btn-confirm" onclick="setAnim('confirm')">AFFIRM</button>
+      <button class="ab"     id="btn-approve" onclick="setAnim('approve')">PRAISE</button>
+      <button class="ab"     id="btn-alert"   onclick="setAnim('alert')">COMBAT</button>
+      <button class="ab"     id="btn-spin"    onclick="setAnim('spin')">EVADE</button>
+    </div>
+  </div>
+  <div class="card">
+    <div class="ct">TELEMETRY DATA</div>
+    <div class="sr"><span class="sk">CORE TEMP</span><span class="sv c" id="ltemp">3200 K</span></div>
+    <div class="sr"><span class="sk">ANIMATION</span><span class="sv c" id="lanim">IDLE</span></div>
+    <div class="sr"><span class="sk">REACTOR</span><span class="sv g" id="lt-power">NOMINAL</span></div>
+    <div class="sr"><span class="sk">OVERDRIVE</span><span class="sv c" id="lt-trans">STANDBY</span></div>
+  </div>
+</div>
+
+<div class="hud-bot">
+  <div class="hb-left">
+    <div class="status-pill"><div class="dot a" id="sys-dot"></div><span id="sys-txt" style="color:#ffcc00">ASSEMBLING</span></div>
+    <div class="hs"><div class="val" id="b-stage">0<span style="font-size:12px;opacity:0.5">/7</span></div><div class="lbl">MODULES</div></div>
+  </div>
+  <div class="hb-center" style="text-align:center">
+     <div style="font-family:'Orbitron',sans-serif;font-size:13px;font-weight:900;letter-spacing:4px;color:var(--bright);margin-bottom:6px" id="b-msg">AWAITING PILOT INPUT</div>
+     <div style="font-size:10px;color:var(--theme);opacity:0.6;letter-spacing:2px;text-transform:uppercase;">W A S D TO MOVE • HOLD SHIFT FOR OVERDRIVE • MOUSE TO LOOK</div>
+  </div>
+  <div class="hb-right">
+     <div class="hs" style="text-align:right"><div class="val" id="ltime">00:00</div><div class="lbl">MISSION TIMER</div></div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/EffectComposer.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/RenderPass.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/ShaderPass.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/CopyShader.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/LuminosityHighPassShader.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/UnrealBloomPass.js"></script>
+
+<script>
+/* ======================================================================
+   1. GLOBALS & MATERIALS INITIALIZATION (Zero GLTF Dependency)
+====================================================================== */
+var TransAm = { white: new THREE.Color(0xffaaaa), frame: new THREE.Color(0xaa0000), emissive: new THREE.Color(0x660000) };
+var BaseCol = { white: new THREE.Color(0xeaeaea), frame: new THREE.Color(0x222528), emissive: new THREE.Color(0x000000) };
+var cR = null;
+
+var hangarGlows = [];
+var hangarLights = [];
+var hangarGrid = null;
+
+/* ── PURE WEB AUDIO API SYNTHESIZER (NO EXTERNAL FILES) ── */
+const AudioSys = {
+  ctx: null,
+  bgmOsc: null, bgmGain: null,
+  init: function() { 
+      if(!this.ctx) {
+          this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+          this.playBGM();
+      }
+      if(this.ctx.state === 'suspended') this.ctx.resume();
+  },
+  playBGM: function() {
+      this.bgmOsc = this.ctx.createOscillator();
+      this.bgmGain = this.ctx.createGain();
+      this.bgmOsc.type = 'sine'; this.bgmOsc.frequency.value = 45;
+      this.bgmGain.gain.value = 0.15;
+      this.bgmOsc.connect(this.bgmGain); this.bgmGain.connect(this.ctx.destination);
+      this.bgmOsc.start();
+  },
+  playUi: function() { 
+      if(!this.ctx) return;
+      const o = this.ctx.createOscillator(), g = this.ctx.createGain();
+      o.type = 'sine'; o.frequency.setValueAtTime(900, this.ctx.currentTime);
+      g.gain.setValueAtTime(0.1, this.ctx.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.1);
+      o.connect(g); g.connect(this.ctx.destination);
+      o.start(); o.stop(this.ctx.currentTime + 0.1);
+  },
+  playInstall: function() { 
+      if(!this.ctx) return;
+      const o = this.ctx.createOscillator(), g = this.ctx.createGain();
+      o.type = 'sawtooth'; o.frequency.setValueAtTime(80, this.ctx.currentTime);
+      o.frequency.exponentialRampToValueAtTime(400, this.ctx.currentTime + 0.4);
+      g.gain.setValueAtTime(0.1, this.ctx.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.4);
+      o.connect(g); g.connect(this.ctx.destination);
+      o.start(); o.stop(this.ctx.currentTime + 0.4);
+  },
+  playSnap: function() { 
+      if(!this.ctx) return;
+      const o = this.ctx.createOscillator(), g = this.ctx.createGain();
+      o.type = 'square'; o.frequency.setValueAtTime(60, this.ctx.currentTime);
+      o.frequency.exponentialRampToValueAtTime(20, this.ctx.currentTime + 0.25);
+      g.gain.setValueAtTime(0.3, this.ctx.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.25);
+      o.connect(g); g.connect(this.ctx.destination);
+      o.start(); o.stop(this.ctx.currentTime + 0.25);
+  },
+  playSurge: function() { 
+      if(!this.ctx) return;
+      const osc1 = this.ctx.createOscillator(), osc2 = this.ctx.createOscillator(), gain = this.ctx.createGain();
+      osc1.type = 'sine'; osc2.type = 'square';
+      osc1.frequency.setValueAtTime(100, this.ctx.currentTime); 
+      osc2.frequency.setValueAtTime(101, this.ctx.currentTime);
+      osc1.frequency.exponentialRampToValueAtTime(20, this.ctx.currentTime + 3.5);
+      osc2.frequency.exponentialRampToValueAtTime(10, this.ctx.currentTime + 3.5);
+      gain.gain.setValueAtTime(0, this.ctx.currentTime);
+      gain.gain.linearRampToValueAtTime(0.6, this.ctx.currentTime + 0.2);
+      gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 3.5);
+      osc1.connect(gain); osc2.connect(gain); gain.connect(this.ctx.destination);
+      osc1.start(); osc2.start();
+      osc1.stop(this.ctx.currentTime + 3.5); osc2.stop(this.ctx.currentTime + 3.5);
+  },
+  playStep: function() {
+      if(!this.ctx) return;
+      const o = this.ctx.createOscillator(), g = this.ctx.createGain();
+      o.type = 'triangle'; o.frequency.setValueAtTime(70, this.ctx.currentTime);
+      o.frequency.exponentialRampToValueAtTime(20, this.ctx.currentTime + 0.15);
+      g.gain.setValueAtTime(0.15, this.ctx.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.15);
+      o.connect(g); g.connect(this.ctx.destination);
+      o.start(); o.stop(this.ctx.currentTime + 0.15);
+  },
+  voice: (text) => {
+    if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+        const msg = new SpeechSynthesisUtterance(text);
+        msg.pitch = 0.6; msg.rate = 1.3; msg.lang = 'en-US';
+        window.speechSynthesis.speak(msg);
+    }
+  }
+};
+document.addEventListener('click', () => { AudioSys.init(); }, {once:true});
+
+/* ── DATA: REAL ONBOARDING MISSIONS ── */
+const STAGES = [
+  { id: 1, name: 'NOTEBOOK LM', sub: 'AI Knowledge Base', action: 'SYNC CORE', content: `<b>Initiating SanFun Protocol: NotebookLM</b><br><br>The Mobile Suit requires foundational knowledge to operate. NotebookLM serves as your AI co-pilot and company brain.<br><br>• Absorb company handbooks.<br>• Query HR policies instantly.<br><br>Confirm synchronization to initialize the inner frame.` },
+  { id: 2, name: 'KBANK PAYROLL', sub: 'Financial Lifeblood', action: 'LINK ACCOUNT', content: `<b>Energy Matrix: KBank Integration</b><br><br>Your suit's energy depends on continuous resource supply. Link your KBank account to establish the payroll pipeline.<br><br>• Salary routing verified.<br>• Expense tracking enabled.<br><br>Authorize financial integration.` },
+  { id: 3, name: 'MONDAY.COM', sub: 'Task & Workflow', action: 'DEPLOY ARMS', content: `<b>Tactical Manipulators: Monday.com</b><br><br>To execute missions, the Mobile Suit must track objectives. Monday.com will manage all ongoing workflows and sprints.<br><br>• Sync project boards.<br>• Assign daily objectives.<br><br>Engage task management arms.` },
+  { id: 4, name: 'GOOGLE CALENDAR', sub: 'Chronos Drive', action: 'SYNC TIME', content: `<b>Chronos Drive: Google Calendar</b><br><br>Time is a critical variable on the battlefield. Synchronize your Google Calendar to manage meetings and deadlines.<br><br>• Import team meetings.<br>• Set focus time blocks.<br><br>Lock temporal servos.` },
+  { id: 5, name: 'LINE SF', sub: 'Comms Array', action: 'ACTIVATE COMMS', content: `<b>Optics & Comms: Line SF</b><br><br>A lone wolf falls. Connect to Line SF to establish direct communication with your squad and commanding officers.<br><br>• Join official groups.<br>• Enable priority alerts.<br><br>Connect the cranial comms unit.` },
+  { id: 6, name: 'COLLEAGUE MEMORY', sub: 'Team Sync', action: 'VERIFY TEAM', content: `<b>Cognitive Sync: Colleague Names</b><br><br>A true pilot knows their team. Verify that you have memorized the names of your squad members.<br><br>• Facial recognition linked.<br>• Team synergy maximized.<br><br>Insert the neural processor.` },
+  { id: 7, name: 'ONBOARDING PASSED', sub: 'Full Awakening', action: 'AWAKEN MECH', content: `<b>Total System Override</b><br><br>All physical systems and onboarding protocols are complete. Hardware is primed.<br><br>By initiating the awakening, you will officially join the ranks of SanFun Group.<br><br>Prepare for full system integration.` }
+];
+
+// DYNAMIC CAMERA SWOOP TARGETS
+const CamTargets = {
+  1: { t: 0.5, p: 1.4, r: 12, panY: -2 }, 
+  2: { t: 0.5, p: 1.4, r: 10, panY: 0 },  
+  3: { t: -0.3, p: 1.4, r: 12, panY: 1 }, 
+  4: { t: 0.8, p: 1.3, r: 14, panY: -1 }, 
+  5: { t: 0.2, p: 1.5, r: 8,  panY: 3 },  
+  6: { t: 0.5, p: 1.5, r: 7,  panY: 3 },  
+  7: { t: 0.5, p: 1.3, r: 10, panY: 1 }   
+};
+
+let currentStage = parseInt(localStorage.getItem('sf_titan_stage')) || 1;
+let currentDept = localStorage.getItem('sf_dept');
+let pilotName = localStorage.getItem('sf_pilot') || 'RECRUIT';
+let isFullyAssembled = false;
+let activeTaskId = null;
+const keys = { w:false, a:false, s:false, d:false, shift:false };
+let mouseX = 0, mouseY = 0;
+
+function saveProgress(s){ localStorage.setItem('sf_titan_stage', s); }
+window.resetProgress = () => { localStorage.clear(); location.reload(); }
+
+/* ── DEPARTMENT COLOR & NAMEPLATE ── */
+function checkDeptSelection() {
+    if (!currentDept && currentStage === 1) {
+        document.getElementById('dept-modal').classList.add('show');
+        AudioSys.voice("Pilot, designate division.");
+    } else if (currentDept) {
+        applyDeptColor(currentDept);
+        updateNameplate(pilotName);
+    }
+}
+
+window.selectDept = function(dept) {
+    const pName = document.getElementById('pilot-name').value.trim() || 'RECRUIT';
+    pilotName = pName; currentDept = dept;
+    localStorage.setItem('sf_dept', dept); localStorage.setItem('sf_pilot', pName);
+    applyDeptColor(dept); updateNameplate(pilotName);
+    AudioSys.playUi(); AudioSys.voice(dept + " division confirmed.");
+    document.getElementById('dept-modal').classList.remove('show');
+}
+
+function applyDeptColor(dept) {
+    let uiCol = '#00ffff', pWhite = 0xeaeaea, pMain = 0x0044cc, pAcc = 0xdd0011, pGlow = 0x00ffff;
+    
+    if (dept === 'system') { 
+        uiCol = '#00aaff'; pWhite = 0xc0d0e0; pMain = 0x0033aa; pAcc = 0x222222; pGlow = 0x00aaff; 
+    } 
+    else if (dept === 'marketing') { 
+        uiCol = '#ff8800'; pWhite = 0xeeeeee; pMain = 0xff6600; pAcc = 0x333333; pGlow = 0xffaa00; 
+    }
+
+    document.documentElement.style.setProperty('--theme', uiCol);
+    document.documentElement.style.setProperty('--theme-dim', uiCol + '26');
+    
+    if (M && M.white) {
+        M.white.color.setHex(pWhite); M.blue.color.setHex(pMain); M.red.color.setHex(pAcc);
+        M.glow.color.setHex(pGlow); M.glowC.color.setHex(pGlow);
+    }
+    if (cR) cR.color.setHex(pGlow);
+    if (hangarGlows.length > 0) hangarGlows.forEach(mat => { if(mat.color) mat.color.setHex(pGlow); });
+    if (hangarLights.length > 0) hangarLights.forEach(l => l.color.setHex(pGlow));
+    if (hangarGrid) hangarGrid.material.color.setHex(pGlow);
+    if (typeof shockwaveMat !== 'undefined' && shockwaveMat) shockwaveMat.color.setHex(pGlow);
+    
+    TransAm.white.setHex(0xffaaaa); TransAm.frame.setHex(0xaa0000); TransAm.emissive.setHex(0x660000);
+    BaseCol.white.setHex(pWhite); BaseCol.frame.setHex(0x222528); BaseCol.emissive.setHex(0x000000);
+}
+
+/* ── UI GEN ── */
+function renderUI() {
+  const c = document.getElementById('stages-container'); c.innerHTML = '';
+  STAGES.forEach(st => {
+    let cls = 'lck', bdg = 'LOCKED';
+    if(st.id < currentStage) { cls = 'done'; bdg = 'INTEGRATED'; } 
+    else if(st.id === currentStage) { cls = 'act'; bdg = 'REQUIRED'; }
+    c.innerHTML += `<div class="si ${cls}"><div class="si-header"><div class="sn">0${st.id}</div><div class="si-info"><div class="sname">${st.name}</div><div class="ssub">${st.sub}</div></div><div class="sbadge">${bdg}</div></div><button class="install-btn" onclick="openTask(${st.id})">${st.action}</button></div>`;
+  });
+  const pct = Math.floor(((currentStage - 1) / 7) * 100);
+  const pbVal = document.getElementById('pb-val'); if(pbVal) pbVal.textContent = pct + '%';
+  const pbFill = document.getElementById('pb-fill'); if(pbFill) pbFill.style.width = pct + '%';
+  const bStage = document.getElementById('b-stage'); if(bStage) bStage.innerHTML = `${Math.min(currentStage - 1, 7)}<span style="font-size:12px;opacity:0.5">/7</span>`;
+}
+
+window.openTask = (id) => {
+  if(id !== currentStage || isFullyAssembled) return;
+  AudioSys.playUi(); activeTaskId = id;
+  const s = STAGES[id-1];
+  AudioSys.voice(`${s.name} standby.`);
+  document.getElementById('tm-title').textContent = `DIRECTIVE 0${id}`;
+  document.getElementById('tm-content').innerHTML = s.content;
+  document.getElementById('tm-btn').textContent = s.action;
+  document.getElementById('task-modal').classList.add('show');
+}
+window.closeTask = () => { AudioSys.playUi(); document.getElementById('task-modal').classList.remove('show'); activeTaskId=null; }
+window.completeTask = () => { if(!activeTaskId)return; const id=activeTaskId; closeTask(); setTimeout(()=>triggerInstall(id), 400); }
+
+/* ── 3D ENGINE & CAMERA ── */
+const canvas = document.getElementById('c');
+const renderer = new THREE.WebGLRenderer({canvas, antialias:true, alpha:false});
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.setSize(innerWidth, innerHeight);
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.0; 
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x020408);
+scene.fog = new THREE.FogExp2(0x020408, 0.02); 
+
+const cam = new THREE.PerspectiveCamera(45, innerWidth/innerHeight, 0.1, 300);
+cam.position.set(0, 4, 22);
+
+// POST PROCESSING (Bloom)
+const renderScene = new THREE.RenderPass(scene, cam);
+const bloomPass = new THREE.UnrealBloomPass(new THREE.Vector2(innerWidth, innerHeight), 0.6, 0.5, 0.8); 
+bloomPass.threshold = 0.5; 
+bloomPass.strength = 0.8; 
+bloomPass.radius = 0.5;
+const composer = new THREE.EffectComposer(renderer);
+composer.addPass(renderScene);
+composer.addPass(bloomPass);
+
+// LIGHTS
+scene.add(new THREE.AmbientLight(0x0a1526, 1.2)); 
+const sun = new THREE.DirectionalLight(0xffffff, 1.5); 
+sun.position.set(8, 20, 10); sun.castShadow = true;
+sun.shadow.mapSize.set(2048, 2048);
+sun.shadow.camera.near = 1; sun.shadow.camera.far = 60;
+sun.shadow.camera.left=-15; sun.shadow.camera.right=15; sun.shadow.camera.top=15; sun.shadow.camera.bottom=-15;
+sun.shadow.bias = -0.001;
+scene.add(sun);
+
+cR = new THREE.PointLight(0x00ffff, 0, 25); cR.position.set(-7,5,-2); scene.add(cR);
+const rR = new THREE.PointLight(0xff0033, 0, 20); rR.position.set(6,4,-4); scene.add(rR);
+
+// MAX DETAIL PBR MATERIALS
+var M = {
+  white: new THREE.MeshPhysicalMaterial({ color: 0xeaeaea, metalness: 0.1, roughness: 0.3, clearcoat: 1.0, clearcoatRoughness: 0.1 }),
+  blue:  new THREE.MeshPhysicalMaterial({ color: 0x0044cc, metalness: 0.4, roughness: 0.3, clearcoat: 0.8 }),
+  red:   new THREE.MeshPhysicalMaterial({ color: 0xdd0011, metalness: 0.4, roughness: 0.3, clearcoat: 0.8 }),
+  gold:  new THREE.MeshStandardMaterial({ color: 0xffcc00, metalness: 0.9, roughness: 0.2 }),
+  frame: new THREE.MeshStandardMaterial({ color: 0x222528, metalness: 0.9, roughness: 0.5 }),
+  metal: new THREE.MeshStandardMaterial({ color: 0x8899aa, metalness: 1.0, roughness: 0.4 }),
+  glow:  new THREE.MeshBasicMaterial({ color: 0x00ff66 }),
+  glowC: new THREE.MeshBasicMaterial({ color: 0x00ffff })
+};
+
+// 3D NAMEPLATE
+const nameplateMat = new THREE.SpriteMaterial({ color: 0xffffff, transparent: true });
+const nameplate = new THREE.Sprite(nameplateMat);
+nameplate.scale.set(7, 1.75, 1);
+nameplate.position.set(0, 2.0, 0);
+
+function updateNameplate(text) {
+    const nctx = document.createElement('canvas').getContext('2d');
+    nctx.canvas.width = 512; nctx.canvas.height = 128;
+    nctx.fillStyle = 'rgba(0, 0, 0, 0)'; nctx.fillRect(0,0,512,128);
+    nctx.font = '900 45px Orbitron'; 
+    nctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--theme').trim() || '#00ffff'; 
+    nctx.textAlign = 'center'; nctx.textBaseline = 'middle';
+    nctx.fillText('PILOT: ' + text.toUpperCase(), 256, 64);
+    const tex = new THREE.CanvasTexture(nctx.canvas);
+    nameplateMat.map = tex; nameplateMat.needsUpdate = true;
+}
+
+/* ── CHAMFERED PROCEDURAL MECH BUILDER (OCTAGONAL) ── */
+function O(rt,rb,h,m,x=0,y=0,z=0,rx=0,ry=0,rz=0){
+    const o=new THREE.Mesh(new THREE.CylinderGeometry(rt,rb,h,8),m);
+    o.position.set(x,y,z); o.rotation.set(rx,ry+Math.PI/8,rz);
+    o.castShadow=true; o.receiveShadow=true; return o;
+}
+function B(w,h,d,m,x=0,y=0,z=0,rx=0,ry=0,rz=0){const o=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),m);o.position.set(x,y,z);o.rotation.set(rx,ry,rz);o.castShadow=true;o.receiveShadow=true;return o}
+function C(rt,rb,h,s,m,x=0,y=0,z=0,rx=0,ry=0,rz=0){const o=new THREE.Mesh(new THREE.CylinderGeometry(rt,rb,h,s),m);o.position.set(x,y,z);o.rotation.set(rx,ry,rz);o.castShadow=true;o.receiveShadow=true;return o}
+function S(r,m,x=0,y=0,z=0, sx=1,sy=1,sz=1){const o=new THREE.Mesh(new THREE.SphereGeometry(r,32,32),m);o.position.set(x,y,z);o.scale.set(sx,sy,sz);o.castShadow=true;o.receiveShadow=true;return o}
+function W(rt,rb,h,m,x=0,y=0,z=0,rx=0,ry=0,rz=0){const o=new THREE.Mesh(new THREE.CylinderGeometry(rt,rb,h,4),m);o.position.set(x,y,z);o.rotation.set(rx,ry,rz);o.castShadow=true;o.receiveShadow=true;return o}
+
+const robot = new THREE.Group(); scene.add(robot);
+
+const torsoG = new THREE.Group(); torsoG.position.y = 4.2; robot.add(torsoG);
+const headG = new THREE.Group(); headG.position.y = 0.8; headG.add(nameplate); 
+const armR = new THREE.Group(); armR.position.set(1.0, 0.2, 0); 
+const armL = new THREE.Group(); armL.position.set(-1.0, 0.2, 0); 
+const legR = new THREE.Group(); legR.position.set(0.35, -1.0, 0); 
+const legL = new THREE.Group(); legL.position.set(-0.35, -1.0, 0); 
+
+const p1_Chassis=new THREE.Group(); const p2_Core=new THREE.Group(); const p3_Arms=new THREE.Group(); const p4_Legs=new THREE.Group(); const p5_Sensors=new THREE.Group(); const p6_CPU=new THREE.Group(); const p7_Spark=new THREE.Group();
+
+torsoG.add(p1_Chassis); torsoG.add(p2_Core); torsoG.add(p4_Legs); torsoG.add(p3_Arms); headG.add(p5_Sensors); headG.add(p6_CPU); torsoG.add(p7_Spark);
+torsoG.add(headG); p4_Legs.add(legR); p4_Legs.add(legL); p3_Arms.add(armR); p3_Arms.add(armL);
+
+// 1. CHASSIS
+p1_Chassis.add(C(0.25, 0.25, 0.8, 16, M.frame, 0, -0.8, 0)); 
+p1_Chassis.add(O(0.5, 0.6, 0.5, M.white, 0, -1.0, 0)); 
+p1_Chassis.add(O(0.1, 0.2, 0.7, M.white, 0.25, -1.3, 0.35, 0.2, 0, -0.1)); 
+p1_Chassis.add(O(0.1, 0.2, 0.7, M.white, -0.25, -1.3, 0.35, 0.2, 0, 0.1)); 
+p1_Chassis.add(O(0.15, 0.25, 0.6, M.white, 0.6, -1.2, 0, 0, 0, 0.15)); 
+p1_Chassis.add(O(0.15, 0.25, 0.6, M.white, -0.6, -1.2, 0, 0, 0, -0.15)); 
+p1_Chassis.add(O(0.6, 0.8, 0.2, M.white, 0, -1.2, -0.3, -0.2, 0, 0)); 
+p1_Chassis.add(C(0.15, 0.2, 0.3, 16, M.metal, 0, -1.5, -0.5, Math.PI/2)); 
+p1_Chassis.add(O(0.3, 0.1, 0.4, M.red, 0, -1.0, 0.4, 0.1, 0, 0)); 
+p1_Chassis.add(B(0.2, 0.1, 0.1, M.gold, 0, -1.35, 0.5)); 
+
+// 2. CHEST BLOCK
+p2_Core.add(O(0.5, 0.6, 0.6, M.red, 0, -0.2, 0)); 
+p2_Core.add(O(0.8, 0.65, 0.7, M.blue, 0, 0.4, 0)); 
+p2_Core.add(B(0.3, 0.1, 0.15, M.gold, 0.35, 0.4, 0.4, 0.1, 0, 0)); 
+p2_Core.add(B(0.3, 0.1, 0.15, M.gold, -0.35, 0.4, 0.4, 0.1, 0, 0)); 
+p2_Core.add(O(0.2, 0.1, 0.4, M.white, 0, 0, 0.45, 0.15, 0, 0)); 
+p2_Core.add(B(0.6, 0.8, 0.4, M.frame, 0, 0.2, -0.4)); 
+p2_Core.add(O(0.15, 0.25, 0.4, M.metal, 0.25, -0.1, -0.6, Math.PI/6)); 
+p2_Core.add(O(0.15, 0.25, 0.4, M.metal, -0.25, -0.1, -0.6, Math.PI/6)); 
+p2_Core.add(O(0.04, 0.04, 1.0, M.white, 0.35, 0.8, -0.5, Math.PI/8)); 
+p2_Core.add(O(0.04, 0.04, 1.0, M.white, -0.35, 0.8, -0.5, Math.PI/8)); 
+
+// 3. MANIPULATORS (ARMS)
+function mkArm(g, flip){
+  const f = flip ? -1 : 1;
+  g.add(S(0.18, M.frame, 0, 0, 0)); 
+  g.add(O(0.4, 0.5, 0.6, M.blue, f*0.15, 0.2, 0, 0, 0, f*0.1)); 
+  g.add(O(0.15, 0.15, 0.6, M.frame, f*0.1, -0.4, 0)); 
+  g.add(O(0.12, 0.12, 0.3, M.frame, f*0.1, -0.8, 0, Math.PI/2)); 
+  g.add(O(0.2, 0.15, 0.8, M.white, f*0.1, -1.3, 0)); 
+  g.add(S(0.15, M.frame, f*0.1, -1.8, 0)); 
+}
+mkArm(armR, false); mkArm(armL, true);
+
+// 4. THRUSTER LEGS
+function mkLeg(g, flip){
+  const f = flip ? -1 : 1;
+  g.add(S(0.2, M.frame, 0, 0, 0)); 
+  g.add(O(0.25, 0.2, 0.8, M.white, 0, -0.5, 0)); 
+  g.add(O(0.18, 0.18, 0.4, M.frame, 0, -1.0, 0, Math.PI/2)); 
+  g.add(O(0.15, 0.05, 0.3, M.red, 0, -0.9, 0.2, Math.PI/2, 0, 0)); 
+  g.add(O(0.35, 0.4, 1.2, M.white, 0, -1.7, -0.05)); 
+  g.add(O(0.12, 0.2, 0.3, M.metal, 0, -1.7, -0.45, Math.PI/2+0.2)); 
+  g.add(S(0.18, M.frame, 0, -2.4, 0)); 
+  g.add(O(0.2, 0.3, 0.8, M.red, 0, -2.7, 0.15, Math.PI/2, 0, 0)); 
+}
+mkLeg(legR, false); mkLeg(legL, true);
+
+// 5. MAIN SENSORS
+p5_Sensors.add(O(0.1, 0.14, 0.2, M.frame, 0, -0.1, 0)); 
+p5_Sensors.add(O(0.25, 0.25, 0.4, M.white, 0, 0.2, 0)); 
+p5_Sensors.add(O(0.1, 0.05, 0.2, M.red, 0, 0.1, 0.22)); 
+p5_Sensors.add(B(0.25, 0.05, 0.05, M.glow, 0, 0.22, 0.26)); 
+p5_Sensors.add(O(0.1, 0.15, 0.25, M.white, 0.28, 0.15, 0.1)); 
+p5_Sensors.add(O(0.1, 0.15, 0.25, M.white, -0.28, 0.15, 0.1)); 
+
+// 6. V-FIN
+p6_CPU.add(O(0.06, 0.08, 0.1, M.red, 0, 0.38, 0.26)); 
+p6_CPU.add(B(0.02, 0.5, 0.02, M.gold, -0.15, 0.5, 0.28, 0, 0, 0.8)); 
+p6_CPU.add(B(0.02, 0.5, 0.02, M.gold, 0.15, 0.5, 0.28, 0, 0, -0.8)); 
+p6_CPU.add(B(0.06, 0.08, 0.05, M.glowC, 0, 0.45, 0.26)); 
+
+// 7. ZERO SYSTEM SPARK
+const sparkCore = new THREE.Mesh(new THREE.SphereGeometry(0.12, 16, 16), M.glowC);
+sparkCore.position.set(0, 0.2, 0.35);
+p7_Spark.add(sparkCore); 
+
+/* ── IMMERSIVE HANGAR BAY & BRANDING DECAL ── */
+const floorM = new THREE.MeshStandardMaterial({color:0x080c14, metalness:0.9, roughness:0.2});
+const floor = new THREE.Mesh(new THREE.PlaneGeometry(100,100), floorM);
+floor.rotation.x = -Math.PI/2; floor.receiveShadow = true; scene.add(floor);
+
+hangarGrid = new THREE.GridHelper(100, 100, 0x00ffff, 0x020408);
+hangarGrid.material.opacity = 0.1; hangarGrid.material.transparent = true; hangarGrid.position.y = 0.01; scene.add(hangarGrid);
+
+const padR = new THREE.Mesh(new THREE.RingGeometry(2.8, 3.2, 64), new THREE.MeshBasicMaterial({color:0x00e5ff, side:THREE.DoubleSide}));
+padR.rotation.x = -Math.PI/2; padR.position.y = 0.02; scene.add(padR);
+hangarGlows.push(padR.material);
+
+// Hangar Architecture (Tunnel)
+const hangarFrameMat = new THREE.MeshStandardMaterial({color:0x111520, metalness:0.8, roughness:0.5});
+const hangarAccentMat = new THREE.MeshStandardMaterial({color:0x080a0f, metalness:0.9, roughness:0.6});
+const hangarGlowMat = new THREE.MeshBasicMaterial({color:0x00ffff});
+hangarGlows.push(hangarGlowMat);
+
+for(let z = -35; z <= 15; z += 10) {
+    const pL = new THREE.Mesh(new THREE.BoxGeometry(2, 24, 3), hangarFrameMat); pL.position.set(-16, 12, z); scene.add(pL);
+    const pR = new THREE.Mesh(new THREE.BoxGeometry(2, 24, 3), hangarFrameMat); pR.position.set(16, 12, z); scene.add(pR);
+    const roof = new THREE.Mesh(new THREE.BoxGeometry(34, 2, 3), hangarFrameMat); roof.position.set(0, 25, z); scene.add(roof);
+    const wLight1 = new THREE.Mesh(new THREE.BoxGeometry(0.2, 8, 0.5), hangarGlowMat); wLight1.position.set(-14.9, 10, z); scene.add(wLight1);
+    const wLight2 = new THREE.Mesh(new THREE.BoxGeometry(0.2, 8, 0.5), hangarGlowMat); wLight2.position.set(14.9, 10, z); scene.add(wLight2);
+    
+    const pl1 = new THREE.PointLight(0x00ffff, 0.8, 20); pl1.position.set(-14, 10, z); scene.add(pl1);
+    const pl2 = new THREE.PointLight(0x00ffff, 0.8, 20); pl2.position.set(14, 10, z); scene.add(pl2);
+    hangarLights.push(pl1, pl2);
+}
+
+// Blast Doors
+const doorMat = new THREE.MeshStandardMaterial({color:0x0a0d14, metalness:0.6, roughness:0.5});
+const doorL = new THREE.Mesh(new THREE.BoxGeometry(16, 26, 2), doorMat); doorL.position.set(-8, 13, -36); scene.add(doorL);
+const doorR = new THREE.Mesh(new THREE.BoxGeometry(16, 26, 2), doorMat); doorR.position.set(8, 13, -36); scene.add(doorR);
+const seamGlowMat = new THREE.MeshBasicMaterial({color:0xffaa00});
+const seam = new THREE.Mesh(new THREE.BoxGeometry(0.3, 26, 2.1), seamGlowMat); seam.position.set(0, 13, -36); scene.add(seam);
+const seamLight = new THREE.PointLight(0xffaa00, 2.5, 25); seamLight.position.set(0, 10, -34); scene.add(seamLight);
+
+/* ── SHOCKWAVE PARTICLES ── */
+const ptG = new THREE.BufferGeometry(), ptC=200;
+const ptP = new Float32Array(ptC*3), ptV = [];
+for(let i=0;i<ptC;i++){ptP[i*3]=0;ptP[i*3+1]=0;ptP[i*3+2]=0; ptV.push(new THREE.Vector3());}
+ptG.setAttribute('position', new THREE.BufferAttribute(ptP, 3));
+const ptM = new THREE.PointsMaterial({color:0xffdd44, size:0.1, transparent:true, opacity:0, blending:THREE.AdditiveBlending});
+const sparks = new THREE.Points(ptG, ptM); scene.add(sparks);
+
+// Shockwave Ring
+const waveGeo = new THREE.RingGeometry(0.1, 1, 64);
+const shockwaveMat = new THREE.MeshBasicMaterial({color: 0x00ffff, transparent: true, opacity: 0, side: THREE.DoubleSide, blending: THREE.AdditiveBlending});
+const shockwave = new THREE.Mesh(waveGeo, shockwaveMat);
+shockwave.rotation.x = -Math.PI/2; scene.add(shockwave);
+
+let sLife = 0, waveLife = 0, waveSpeed = 10, shakeTime = 0, shakeMag = 0;
+
+function fireShockwave(pos, isMassive = false) {
+  const wp = new THREE.Vector3(); pos.getWorldPosition(wp);
+  sparks.position.copy(wp); ptM.opacity = 1; sLife = 1.0;
+  for(let i=0;i<ptC;i++){ ptV[i].set((Math.random()-0.5)*15, Math.random()*15, (Math.random()-0.5)*15); ptG.attributes.position.setXYZ(i, 0,0,0); }
+  
+  shockwave.position.copy(wp);
+  if(isMassive) shockwave.position.y = 0.05; 
+  waveLife = 1.0; waveSpeed = isMassive ? 80 : 25;
+  shockwave.scale.set(1,1,1);
+  shakeTime = isMassive ? 0.8 : 0.3; shakeMag = isMassive ? 0.6 : 0.2;
+}
+
+const sdG = new THREE.BufferGeometry(), sdC = 300;
+const sdP = new Float32Array(sdC*3);
+for(let i=0;i<sdC;i++){ sdP[i*3]=(Math.random()-0.5)*40; sdP[i*3+1]=(Math.random()-0.5)*40; sdP[i*3+2]=(Math.random()-0.5)*40; }
+sdG.setAttribute('position', new THREE.BufferAttribute(sdP,3));
+const sdM = new THREE.PointsMaterial({color:0xff0066, size:0.2, transparent:true, opacity:0});
+const speedLines = new THREE.Points(sdG, sdM); scene.add(speedLines);
+
+/* ── ASSEMBLY LOGIC & DYNAMIC CAMERA ── */
+const pData = {
+  1: { g: p1_Chassis, r: [0, 8, -6], s: 1, done: false, act: true },
+  2: { g: p2_Core, r: [6, 4, -4], s: 1.5, done: false, act: false },
+  3: { g: p3_Arms, r: [8, 0, -5], s: 1, done: false, act: false },
+  4: { g: p4_Legs, r: [-8, -4, -5], s: 1, done: false, act: false },
+  5: { g: p5_Sensors, r: [-5, 6, -3], s: 1.5, done: false, act: false },
+  6: { g: p6_CPU, r: [5, 7, 0], s: 2, done: false, act: false },
+  7: { g: p7_Spark, r: [0, 0, 8], s: 1, done: false, act: false }
+};
+
+for(let i=1; i<currentStage; i++) {
+  pData[i].done = true; pData[i].act = false;
+  pData[i].g.position.set(0,0,0); pData[i].g.scale.set(1,1,1);
+}
+if(currentStage <= 7) pData[currentStage].act = true;
+
+let isInstalling = false; let installT = 0; let installId = null;
+
+function triggerInstall(id) {
+  isInstalling = true; installT = 0; installId = id; pData[id].act = false;
+  AudioSys.playInstall(); 
+}
+
+function finishInstall() {
+  isInstalling = false; const p = pData[installId];
+  p.done = true; p.g.position.set(0,0,0); p.g.scale.set(1,1,1); p.g.rotation.set(0,0,0);
+  
+  AudioSys.playSnap(); fireShockwave(p.g);
+  currentStage++; saveProgress(currentStage);
+  if(currentStage <= 7) pData[currentStage].act = true; else setTimeout(activateSuit, 1200);
+  renderUI();
+  AudioSys.voice("Module " + installId + " locked.");
+}
+
+function activateSuit() {
+  isFullyAssembled = true; AudioSys.playSurge(); fireShockwave(robot, true);
+  const flash = document.getElementById('flash');
+  if(flash) { flash.style.opacity = '1'; setTimeout(() => flash.style.opacity = '0', 800); }
+  const g = document.getElementById('greeting'); 
+  if(g) { document.getElementById('greet-title').textContent = pilotName + " INTEGRATED"; g.classList.add('show'); setTimeout(() => g.classList.remove('show'), 6000); }
+  
+  const sDot = document.getElementById('sys-dot'); if(sDot) sDot.className = 'dot g';
+  const sTxt = document.getElementById('sys-txt'); if(sTxt) { sTxt.style.color = '#00ff66'; sTxt.textContent = 'ONLINE'; }
+  const bMsg = document.getElementById('b-msg'); if(bMsg) bMsg.textContent = 'MANUAL CONTROL ENGAGED';
+  const pCtrl = document.getElementById('panel-controls'); if(pCtrl) pCtrl.classList.add('unlocked');
+  
+  AudioSys.voice("System online. Control transferred."); setAnim('wave'); 
+}
+
+/* ── INPUT & CAMERA ── */
+window.addEventListener('keydown', e => { const k=e.key.toLowerCase(); if(keys.hasOwnProperty(k)) keys[k]=true; });
+window.addEventListener('keyup', e => { const k=e.key.toLowerCase(); if(keys.hasOwnProperty(k)) keys[k]=false; });
+window.addEventListener('mousemove', e => { mouseX = (e.clientX/innerWidth)*2-1; mouseY = -(e.clientY/innerHeight)*2+1; });
+
+let cDrag=false, cRBtn=false, cPrev={x:0,y:0};
+let sph={t:0.5, p:1.3, r:22}, tsph={t:0.5, p:1.3, r:22};
+let pan=new THREE.Vector3(), tpan=new THREE.Vector3();
+
+canvas.addEventListener('mousedown', e=>{cDrag=true; cRBtn=e.button===2; cPrev={x:e.clientX,y:e.clientY};});
+canvas.addEventListener('contextmenu', e=>e.preventDefault());
+window.addEventListener('mouseup', ()=>cDrag=false);
+window.addEventListener('mousemove', e=>{
+  if(!cDrag)return;
+  const dx=e.clientX-cPrev.x, dy=e.clientY-cPrev.y; cPrev={x:e.clientX,y:e.clientY};
+  if(!cRBtn){ tsph.t -= dx*0.005; tsph.p = Math.max(0.1, Math.min(Math.PI*0.9, tsph.p+dy*0.005)); }
+  else { tpan.x -= dx*0.01; tpan.y += dy*0.01; }
+});
+canvas.addEventListener('wheel', e=>{ tsph.r = Math.max(5, Math.min(40, tsph.r+e.deltaY*0.03)); },{passive:true});
+
+/* VIRTUAL JOYSTICK FOR MOBILE */
+const joyZone = document.getElementById('joystick-zone'); const joyKnob = document.getElementById('joystick-knob');
+let jActive = false;
+joyZone.addEventListener('touchstart', handleJoyStart, {passive:false});
+joyZone.addEventListener('touchmove', handleJoyMove, {passive:false});
+joyZone.addEventListener('touchend', handleJoyEnd);
+
+function handleJoyStart(e) { e.preventDefault(); jActive = true; updateJoy(e.touches[0]); }
+function handleJoyMove(e) { if(jActive) { e.preventDefault(); updateJoy(e.touches[0]); } }
+function handleJoyEnd() { jActive = false; joyKnob.style.transform = `translate(-50%, -50%)`; keys.w=false; keys.a=false; keys.s=false; keys.d=false; }
+function updateJoy(touch) {
+    const rect = joyZone.getBoundingClientRect(); const centerX = rect.left + rect.width / 2; const centerY = rect.top + rect.height / 2;
+    let dx = touch.clientX - centerX; let dy = touch.clientY - centerY;
+    const dist = Math.min(Math.sqrt(dx*dx + dy*dy), 50); const angle = Math.atan2(dy, dx);
+    joyKnob.style.transform = `translate(calc(-50% + ${Math.cos(angle)*dist}px), calc(-50% + ${Math.sin(angle)*dist}px))`;
+    keys.w = Math.sin(angle) < -0.5 && dist > 20; keys.s = Math.sin(angle) > 0.5 && dist > 20;
+    keys.a = Math.cos(angle) < -0.5 && dist > 20; keys.d = Math.cos(angle) > 0.5 && dist > 20; keys.shift = dist > 45; 
+}
+
+/* ── ANIMATION SYS ── */
+let curAnim='idle', aTimer=0, pAnim='idle';
+const AS={
+  idle:{b:0.06,s:1.5,sw:0.02,d:0}, march:{b:0.15,s:8.0,sw:0.1,d:0},
+  wave:{b:0.03,s:1.0,sw:0,d:2.5}, punch:{b:0.03,s:1.0,sw:0,d:1.2},
+  confirm:{b:0,s:0,sw:0,d:2.0}, approve:{b:0.08,s:2.5,sw:0.05,d:2.0},
+  alert:{b:0.08,s:6,sw:0.1,d:2.5}, spin:{b:0,s:0,sw:0,d:2.0}
+};
+const OS=new Set(['wave','punch','confirm','approve','alert','spin']);
+window.setAnim = (n) => {
+  if(!isFullyAssembled || !AS[n]) return;
+  document.querySelectorAll('.ab').forEach(b=>b.classList.remove('on'));
+  const btn=document.getElementById('btn-'+n); if(btn)btn.classList.add('on');
+  if(OS.has(n)){pAnim=curAnim; aTimer=0;}
+  curAnim=n; const animLabel = document.getElementById('lanim'); if(animLabel) animLabel.textContent = n.toUpperCase();
+}
+
+/* ── MAIN LOOP ── */
+renderUI();
+let loadPct=0; const lbw=document.getElementById('lb'), lm=document.getElementById('lm');
+const lInt=setInterval(()=>{
+  loadPct+=Math.random()*15; if(loadPct>100)loadPct=100; lbw.style.width=loadPct+'%';
+  if(loadPct>=100){ clearInterval(lInt); setTimeout(()=>{ const ldr = document.getElementById('loader');
+      if(ldr) { ldr.style.opacity=0; setTimeout(()=>{ldr.style.display='none'; checkDeptSelection();},800); }
+  },500); }
+}, 80);
+
+const clk = new THREE.Clock();
+let stepTimer = 0;
+
+function tick(){
+  requestAnimationFrame(tick);
+  const dt=clk.getDelta(), t=clk.getElapsedTime();
+
+  // FX Updates
+  if(sLife > 0) {
+    sLife -= dt*1.5; ptM.opacity = Math.max(0, sLife); const p = ptG.attributes.position;
+    for(let i=0;i<ptC;i++){ ptV[i].y -= dt*20; p.setXYZ(i, p.getX(i)+ptV[i].x*dt, p.getY(i)+ptV[i].y*dt, p.getZ(i)+ptV[i].z*dt); } p.needsUpdate = true;
+  }
+  if(waveLife > 0) {
+      waveLife -= dt * (waveSpeed===80 ? 1.0 : 2.0);
+      shockwave.scale.addScalar(dt * waveSpeed);
+      shockwaveMat.opacity = Math.max(0, waveLife);
+  }
+
+  // Camera Shake Compute
+  let shX=0, shY=0;
+  if(shakeTime > 0) {
+      shakeTime -= dt;
+      let intens = shakeMag * (shakeTime / 0.8);
+      shX = (Math.random() - 0.5) * intens; shY = (Math.random() - 0.5) * intens;
+  }
+
+  // Cinematic Assembly Flight & Camera Swoop
+  if(isInstalling) {
+      installT += dt * 1.5; 
+      if(installT >= 1) finishInstall();
+      else {
+        const ease = 1 - Math.pow(1 - installT, 3); const arcY = Math.sin(installT * Math.PI) * 5; 
+        const p = pData[installId];
+        p.g.position.set(p.r[0] + (0 - p.r[0]) * ease, p.r[1] + (0 - p.r[1]) * ease + arcY, p.r[2] + (0 - p.r[2]) * ease);
+        p.g.scale.setScalar(p.s + (1 - p.s) * ease); p.g.rotation.y = installT * Math.PI * 4; 
+      }
+      if(CamTargets[installId]) {
+          const tgt = CamTargets[installId]; tsph.t = tgt.t; tsph.p = tgt.p; tsph.r = tgt.r; tpan.y = tgt.panY;
+      }
+  } else if(!cDrag && !isFullyAssembled) {
+      tsph.r = 22; tpan.y = 0;
+  }
+
+  Object.keys(pData).forEach(id => {
+    const p = pData[id];
+    if(p.act && !isInstalling) { p.g.position.set(p.r[0], p.r[1] + Math.sin(t*3)*0.3, p.r[2]); p.g.rotation.y += dt; p.g.scale.lerp(new THREE.Vector3(p.s,p.s,p.s), 0.1); } 
+    else if (!p.done && (!isInstalling || id != installId)) { p.g.scale.set(0,0,0); }
+  });
+
+  if(isFullyAssembled) {
+    let dx=0, dz=0; let speed = keys.shift ? dt * 18 : dt * 7;
+    if(keys.w) dz -= speed; if(keys.s) dz += speed; if(keys.a) dx -= speed; if(keys.d) dx += speed;
+
+    if(keys.shift && (dx!==0 || dz!==0)) {
+      tsph.r = 26; sdM.opacity = 0.5; const sp = sdG.attributes.position;
+      for(let i=0;i<sdC;i++){ let nz = sp.getZ(i) + dt*50; if(nz>20) nz=-20; sp.setZ(i, nz); } sp.needsUpdate=true;
+      const powUI = document.getElementById('lt-trans'); if(powUI) { powUI.textContent = 'ENGAGED'; powUI.className = 'sv r'; }
+      if(M && M.white && TransAm) { M.white.color.lerp(TransAm.white, 0.05); M.frame.color.lerp(TransAm.frame, 0.05); M.frame.emissive.lerp(TransAm.emissive, 0.05); }
+    } else {
+      sdM.opacity *= 0.9;
+      const powUI = document.getElementById('lt-trans'); if(powUI) { powUI.textContent = 'STANDBY'; powUI.className = 'sv c'; }
+      if(M && M.white && BaseCol) { M.white.color.lerp(BaseCol.white, 0.05); M.frame.color.lerp(BaseCol.frame, 0.05); M.frame.emissive.lerp(BaseCol.emissive, 0.05); }
+    }
+
+    if(dx!==0 || dz!==0) {
+      robot.position.x += dx; robot.position.z += dz; tpan.copy(robot.position);
+      const tgtA = Math.atan2(dx, dz); let diff = tgtA - robot.rotation.y;
+      while(diff < -Math.PI) diff += Math.PI*2; while(diff > Math.PI) diff -= Math.PI*2; robot.rotation.y += diff * 0.15;
+      torsoG.rotation.z = -diff * 0.2; torsoG.rotation.x = 0.1; 
+      if(curAnim !== 'march' && !OS.has(curAnim)) setAnim('march'); AS.march.spd = keys.shift ? 12.0 : 8.0; 
+      
+      stepTimer += dt;
+      let sInt = keys.shift ? 0.3 : 0.5;
+      if(stepTimer > sInt) { AudioSys.playStep(); stepTimer = 0; }
+    } else {
+      torsoG.rotation.z *= 0.9; torsoG.rotation.x *= 0.9; if (curAnim === 'march') setAnim('idle');
+      stepTimer = 0;
+    }
+
+    const s = AS[curAnim] || AS.idle;
+    if(OS.has(curAnim)){
+      aTimer += dt;
+      if(aTimer >= s.d){
+        curAnim = pAnim; document.querySelectorAll('.ab').forEach(b=>b.classList.remove('on'));
+        const btn=document.getElementById('btn-'+pAnim); if(btn)btn.classList.add('on');
+        const animLabel = document.getElementById('lanim'); if (animLabel) animLabel.textContent = pAnim.toUpperCase();
+      }
+    }
+
+    robot.position.y = Math.sin(t * s.s) * s.b;
+    if(curAnim === 'idle' || curAnim === 'march') {
+      headG.rotation.y += (-mouseX*0.8 - headG.rotation.y) * 0.1; headG.rotation.x += (-mouseY*0.5 - headG.rotation.x) * 0.1;
+      torsoG.rotation.y += (-mouseX*0.3 - torsoG.rotation.y) * 0.05;
+    } else { headG.rotation.y *= 0.9; headG.rotation.x *= 0.9; torsoG.rotation.y *= 0.9; }
+
+    if(curAnim === 'march') {
+      const sw = Math.sin(t * s.s) * 0.6;
+      legR.rotation.x = sw; legL.rotation.x = -sw; armR.rotation.x = -sw*0.5; armL.rotation.x = sw*0.5;
+      legR.position.y = -1.0 + Math.max(0, -sw*0.3); legL.position.y = -1.0 + Math.max(0, sw*0.3);
+    } else {
+      legR.rotation.x *= 0.8; legL.rotation.x *= 0.8; legR.position.y = -1.0; legL.position.y = -1.0;
+      if(curAnim !== 'punch') { armR.rotation.x *= 0.9; armL.rotation.x *= 0.9; }
+    }
+
+    if(curAnim === 'wave'){ const wt=aTimer/s.d; armR.rotation.z=-Math.PI*0.85*Math.sin(Math.PI*wt); armR.rotation.x=Math.sin(t*10)*0.2*Math.sin(Math.PI*wt); }
+    else if(curAnim !== 'punch' && curAnim !== 'approve'){ armR.rotation.z *= 0.9; }
+    if(curAnim === 'punch'){ armR.rotation.x=-Math.PI*0.9*Math.sin(Math.PI*aTimer/s.d*2); armR.rotation.z=0.2; }
+    if(curAnim === 'approve'){ const rz=-Math.PI*0.7*Math.sin(Math.PI*aTimer/s.d); armR.rotation.z=rz; armL.rotation.z=-rz; }
+    else { armL.rotation.z *= 0.9; }
+    if(curAnim === 'spin'){ robot.rotation.y += dt*Math.PI*4; }
+  }
+
+  sph.t += (tsph.t - sph.t) * 0.08; sph.p += (tsph.p - sph.p) * 0.08; sph.r += (tsph.r - sph.r) * 0.05; pan.lerp(tpan, 0.08);
+  cam.position.set(sph.r*Math.sin(sph.p)*Math.sin(sph.t)+pan.x + shX, sph.r*Math.cos(sph.p)+2+pan.y + shY, sph.r*Math.sin(sph.p)*Math.cos(sph.t)+pan.z);
+  cam.lookAt(pan.x, 2+pan.y, pan.z);
+
+  const el = Math.floor(t);
+  const timeLabel = document.getElementById('ltime'); if (timeLabel) timeLabel.textContent = String(Math.floor(el/60)).padStart(2,'0')+':'+String(el%60).padStart(2,'0');
+  const tempLabel = document.getElementById('ltemp'); if (tempLabel) tempLabel.textContent = (3200 + Math.sin(t) * 100).toFixed(0) + ' K';
+  composer.render();
+}
+
+if(currentDept) { applyDeptColor(currentDept); updateNameplate(pilotName); }
+tick();
+
+window.addEventListener('resize', () => { cam.aspect = innerWidth/innerHeight; cam.updateProjectionMatrix(); renderer.setSize(innerWidth, innerHeight); composer.setSize(innerWidth, innerHeight); });
+</script>
 </body>
 </html>
